@@ -26,18 +26,15 @@ export default function SignUp() {
         e.preventDefault();
 
         let groshi = new GroshiClient(null);
-        groshi
-            .sendRequest("/user/create", {
-                username: username,
-                password: password1,
-            })
-            .then((response) => {
-                if (!response.success) {
-                    setErrorMessage(response.error_details);
-                    return;
-                }
+        groshi.userCreate(username, password1).then((response) => {
+            if (response.status === 200) {
                 navigate("/sign-in");
-            });
+            } else {
+                response.json().then((data) => {
+                    setErrorMessage(data.error_description);
+                });
+            }
+        });
     };
 
     const validateForm = () => {
@@ -105,7 +102,7 @@ export default function SignUp() {
                     </Button>
                     <Grid container justifyContent="flex-start">
                         <Grid item>
-                            <Link href="/login" variant="body2">
+                            <Link href="/sign-in" variant="body2">
                                 Already have an account? Sign in
                             </Link>
                         </Grid>

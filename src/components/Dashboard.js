@@ -20,9 +20,9 @@ const DEFAULT_SUMMARY = {
 
 const columns = [
     // hidden columns
-    {field: "id"},
-    {field: "updated_at"},
-    {field: "created_at"},
+    { field: "id" },
+    { field: "updated_at" },
+    { field: "created_at" },
     {
         field: "date",
         type: "date",
@@ -41,7 +41,7 @@ const columns = [
         field: "currency",
         headerName: "Currency",
         editable: true,
-        description: "Original currency of transaction"
+        description: "Original currency of transaction",
     },
     {
         field: "description",
@@ -104,53 +104,6 @@ export default function Dashboard() {
             navigate("/sign-in");
             return;
         }
-
-        let groshi = new GroshiClient(token);
-        let date = new Date();
-
-        let dayBeginning = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
-        let dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
-
-        let weekBeginning = getClosestWeekBeginning();
-        // let weekEnd = todo:
-
-        let monthBeginning = new Date(date.getFullYear(), date.getMonth(), 1);
-        let monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-        // fetching day summary
-        fetchSummary(groshi, dayBeginning, dayEnd, setDaySummary, setErrorMessage);
-
-        // fetching week summary
-
-        // fetching month summary
-        fetchSummary(groshi, monthBeginning, monthEnd, setMonthSummary, setErrorMessage);
-
-        // fetching transaction list
-        groshi
-            .sendRequest(
-                "/transaction/list",
-                {
-                    since: monthBeginning.toISOString(),
-                    until: monthEnd.toISOString(),
-                },
-                true
-            )
-            .then((response) => {
-                if (!response.success) {
-                    alert("Error: " + response.error_details + ".");
-                    return;
-                }
-                console.log(response.data.transactions);
-                response.data.transactions.forEach(transaction => {
-                    setRows(rows => [...rows, { // todo
-                        id: transaction.uuid,
-                        date: new Date(transaction.date),
-                        amount: transaction.amount,
-                        currency: transaction.currency,
-                        description: transaction.description,
-                    }]);
-                });
-            });
     }, []);
 
     return (
@@ -242,7 +195,7 @@ export default function Dashboard() {
                                         id: false,
                                         created_at: false,
                                         updated_at: false,
-                                      }}
+                                    }}
                                     pageSizeOptions={[5]}
                                     checkboxSelection
                                     disableRowSelectionOnClick
@@ -252,7 +205,6 @@ export default function Dashboard() {
                     </Grid>
                 </Grid>
             </Box>
-
         </Box>
     );
 }

@@ -32,23 +32,16 @@ export default function SignIn() {
         e.preventDefault();
         let groshi = new GroshiClient(null);
 
-        groshi
-            .sendRequest(
-                "/user/auth",
-                {
-                    username: username,
-                    password: password,
-                },
-                false
-            )
-            .then((response) => {
-                if (!response.success) {
-                    setErrorMessage(response.error_details);
-                    return;
+        groshi.authLogin(username, password).then((response) => {
+            response.json().then((data) => {
+                if (response.status === 200) {
+                    localStorage.setItem("token", data.token);
+                    navigate("/");
+                } else {
+                    setErrorMessage(data.error_description);
                 }
-                localStorage.setItem("token", response.data.token);
-                navigate("/");
             });
+        });
     };
 
     return (
@@ -108,7 +101,7 @@ export default function SignIn() {
                     </Button>
                     <Grid container>
                         <Grid item>
-                            <Link href="/register" variant="body2">
+                            <Link href="/sign-up" variant="body2">
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>

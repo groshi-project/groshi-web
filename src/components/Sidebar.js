@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
+import GroshiClient from "../groshi";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
@@ -21,15 +22,35 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PollIcon from "@mui/icons-material/Poll";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export const sidebarWidth = 240;
 
 export function Sidebar(props) {
+    const navigate = useNavigate();
     const { window } = props;
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
+    };
+
+    const logout = (e) => {
+        e.preventDefault();
+        let token = localStorage.getItem("token");
+        let groshi = new GroshiClient(token);
+
+        groshi.authLogout().then((response) => {
+            if (response.status === 200) {
+                localStorage.removeItem("token");
+                navigate("/sign-in");
+            } else {
+                console.log("error logging out!");
+                response.json().then((data) => {
+                    console.log(data);
+                });
+            }
+        });
     };
 
     const drawer = (
@@ -73,7 +94,7 @@ export function Sidebar(props) {
             <Divider />
             <List>
                 <ListItem key="logout" disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={(e) => logout(e)}>
                         <ListItemIcon>
                             <LogoutIcon></LogoutIcon>
                         </ListItemIcon>
