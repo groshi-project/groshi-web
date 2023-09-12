@@ -20,21 +20,20 @@ export default function SignUp() {
     const [password1, setPassword1] = useState("");
     const [password2, setPassword2] = useState("");
 
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        let groshi = new GroshiClient(null);
-        groshi.userCreate(username, password1).then((response) => {
-            if (response.status === 200) {
+        let groshi = new GroshiClient();
+        groshi
+            .userCreate(username, password1)
+            .then((_) => {
                 navigate("/sign-in");
-            } else {
-                response.json().then((data) => {
-                    setErrorMessage(data.error_description);
-                });
-            }
-        });
+            })
+            .catch((e) => {
+                setErrorMessage(e.toString());
+            });
     };
 
     const validateForm = () => {

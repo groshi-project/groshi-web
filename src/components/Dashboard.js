@@ -4,7 +4,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import { Card, Grid } from "@mui/material";
+import { Card, Grid, Tooltip, Button } from "@mui/material";
 import GroshiClient from "../groshi";
 import { Sidebar, sidebarWidth } from "./Sidebar";
 import { getClosestWeekBeginning } from "../util";
@@ -12,10 +12,10 @@ import TopbarUser from "./TopbarUser";
 import { DataGrid } from "@mui/x-data-grid";
 
 const DEFAULT_SUMMARY = {
-    count: 0,
     income: 0,
     outcome: 0,
     total: 0,
+    transactions_count: 0,
 };
 
 const columns = [
@@ -34,14 +34,15 @@ const columns = [
         field: "amount",
         type: "number",
         headerName: "Amount",
-        width: 100,
+        width: 150,
         editable: true,
     },
     {
         field: "currency",
         headerName: "Currency",
         editable: true,
-        description: "Original currency of transaction",
+        description: "Currency",
+        width: 100,
     },
     {
         field: "description",
@@ -52,34 +53,6 @@ const columns = [
         sortable: false,
     },
 ];
-
-function roundTo(n, place) {
-    return +(Math.round(n + "e+" + place) + "e-" + place);
-}
-
-function fetchSummary(groshi, since, until, setSummary, setErrorMessage) {
-    return groshi
-        .sendRequest(
-            "/transaction/summary",
-            {
-                since: since,
-                until: until,
-            },
-            true
-        )
-        .then((response) => {
-            if (!response.success) {
-                setErrorMessage(response.error_details);
-                return;
-            }
-            console.log(response);
-            response.data.income = roundTo(response.data.income, 2);
-            response.data.outcome = roundTo(response.data.outcome, 2);
-            response.data.total = roundTo(response.data.total, 2);
-
-            setSummary(response.data);
-        });
-}
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -99,11 +72,52 @@ export default function Dashboard() {
 
     useEffect(() => {
         let token = localStorage.getItem("token");
-
         if (!token) {
             navigate("/sign-in");
-            return;
         }
+
+        let groshi = new GroshiClient(token);
+
+        let currency = "RUB";
+        setCurrencySymbol("$");
+
+        let date = new Date();
+        let dayBeginning = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+        let dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+
+        groshi
+            .transactionsSummary(currency, dayBeginning.toISOString(), dayEnd.toISOString())
+            .then((data) => {
+                setDaySummary({
+                    income: data.income / 100,
+                    outcome: data.outcome / 100,
+                    total: data.total / 100,
+                    transactions_count: data.transactions_count,
+                });
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+
+        // let weekBeginning = getClosestWeekBeginning();
+        // let weekEnd = todo:
+
+        let monthBeginning = new Date(date.getFullYear(), date.getMonth(), 1);
+        let monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        groshi
+            .transactionsSummary(currency, monthBeginning.toISOString(), monthEnd.toISOString())
+            .then((data) => {
+                setMonthSummary({
+                    income: data.income / 100,
+                    outcome: data.outcome / 100,
+                    total: data.total / 100,
+                    transactions_count: data.transactions_count,
+                });
+            })
+            .catch((e) => {
+                console.log(e);
+            });
     }, []);
 
     return (
@@ -124,19 +138,22 @@ export default function Dashboard() {
                             {currencySymbol}
                         </Typography>
                         <Typography variant="subtitle2">
-                            (
                             <span color="green" style={{ color: "green" }}>
                                 +{daySummary.income}
                                 {currencySymbol}
                             </span>
                             <span>, </span>
                             <span style={{ color: "red" }}>
-                                {daySummary.outcome}
+                                -{daySummary.outcome}
                                 {currencySymbol}
                             </span>
-                            )
                         </Typography>
-                        <Typography variant="subtitle1">Today</Typography>
+                        <Typography variant="subtitle1">
+                            <b>Today</b>{" "}
+                            <Tooltip title="Transactions count today">
+                                <span>({daySummary.transactions_count})</span>
+                            </Tooltip>
+                        </Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
                         <Typography variant="h2" fontWeight={"normal"}>
@@ -144,19 +161,22 @@ export default function Dashboard() {
                             {currencySymbol}
                         </Typography>
                         <Typography variant="subtitle2">
-                            (
                             <span color="green" style={{ color: "green" }}>
                                 +{weekSummary.income}
                                 {currencySymbol}
                             </span>
                             <span>, </span>
                             <span style={{ color: "red" }}>
-                                {weekSummary.outcome}
+                                -{weekSummary.outcome}
                                 {currencySymbol}
                             </span>
-                            )
                         </Typography>
-                        <Typography variant="subtitle1">This week</Typography>
+                        <Typography variant="subtitle1">
+                            <b>This week</b>{" "}
+                            <Tooltip title="Transactions count in this week">
+                                <span>({weekSummary.transactions_count})</span>
+                            </Tooltip>
+                        </Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
                         <Typography variant="h2" fontWeight={"normal"}>
@@ -164,20 +184,26 @@ export default function Dashboard() {
                             {currencySymbol}
                         </Typography>
                         <Typography variant="subtitle2">
-                            (
                             <span color="green" style={{ color: "green" }}>
                                 +{monthSummary.income}
                                 {currencySymbol}
                             </span>
                             <span>, </span>
                             <span style={{ color: "red" }}>
-                                {monthSummary.outcome}
+                                -{monthSummary.outcome}
                                 {currencySymbol}
                             </span>
-                            )
                         </Typography>
-                        <Typography variant="subtitle1">This month</Typography>
+                        <Typography variant="subtitle1">
+                            <b>This month</b>{" "}
+                            <Tooltip title="Transactions count in this month">
+                                <span>({monthSummary.transactions_count})</span>
+                            </Tooltip>
+                        </Typography>
                     </Grid>
+                    {/*<Grid item xs={12} md={12} mt={10}>*/}
+                    {/*    <Button>123</Button>*/}
+                    {/*</Grid>*/}
                     <Grid item xs={12} md={12} mt={10}>
                         <Box>
                             <Box sx={{ height: 400, width: "100%" }}>

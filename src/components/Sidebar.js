@@ -37,20 +37,8 @@ export function Sidebar(props) {
 
     const logout = (e) => {
         e.preventDefault();
-        let token = localStorage.getItem("token");
-        let groshi = new GroshiClient(token);
-
-        groshi.authLogout().then((response) => {
-            if (response.status === 200) {
-                localStorage.removeItem("token");
-                navigate("/sign-in");
-            } else {
-                console.log("error logging out!");
-                response.json().then((data) => {
-                    console.log(data);
-                });
-            }
-        });
+        localStorage.removeItem("token");
+        navigate("/sign-in");
     };
 
     const drawer = (

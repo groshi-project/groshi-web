@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -20,7 +20,6 @@ export default function SignIn() {
     useEffect(() => {
         if (localStorage.getItem("token")) {
             navigate("/");
-            return;
         }
     }, []);
 
@@ -30,18 +29,17 @@ export default function SignIn() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        let groshi = new GroshiClient(null);
+        let groshi = new GroshiClient();
 
-        groshi.authLogin(username, password).then((response) => {
-            response.json().then((data) => {
-                if (response.status === 200) {
-                    localStorage.setItem("token", data.token);
-                    navigate("/");
-                } else {
-                    setErrorMessage(data.error_description);
-                }
+        groshi
+            .authLogin(username, password)
+            .then((response) => {
+                localStorage.setItem("token", response.token);
+                navigate("/");
+            })
+            .catch((e) => {
+                setErrorMessage(e.toString());
             });
-        });
     };
 
     return (
@@ -85,11 +83,7 @@ export default function SignIn() {
                         onChange={(e) => setPassword(e.target.value)}
                         error={errorMessage != null}
                     />
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                    />
-                    {errorMessage && <Alert severity="error">Error: {errorMessage}.</Alert>}
+                    {errorMessage && <Alert severity="error">{errorMessage}.</Alert>}
                     <Button
                         type="submit"
                         fullWidth
