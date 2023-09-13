@@ -7,9 +7,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Alert, Box, Checkbox, Container, FormControlLabel, Grid, Link } from "@mui/material";
 import GroshiClient from "../groshi";
-import TopbarGuest from "./TopbarGuest";
+import GuestTopBar from "../components/GuestTopBar";
 
-export default function SignIn() {
+import * as routes from "../routes";
+
+export default function Login() {
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
@@ -17,9 +19,10 @@ export default function SignIn() {
 
     const [errorMessage, setErrorMessage] = useState(null);
 
+    // redirect user to the dashboard if token is already stored:
     useEffect(() => {
         if (localStorage.getItem("token")) {
-            navigate("/");
+            navigate(routes.DASHBOARD_ROUTE);
         }
     }, []);
 
@@ -35,7 +38,7 @@ export default function SignIn() {
             .authLogin(username, password)
             .then((response) => {
                 localStorage.setItem("token", response.token);
-                navigate("/");
+                navigate(routes.DASHBOARD_ROUTE);
             })
             .catch((e) => {
                 setErrorMessage(e.toString());
@@ -44,7 +47,7 @@ export default function SignIn() {
 
     return (
         <Container component="main" maxWidth="xs">
-            <TopbarGuest></TopbarGuest>
+            <GuestTopBar login></GuestTopBar>
             <Box
                 sx={{
                     marginTop: 20,
@@ -91,13 +94,14 @@ export default function SignIn() {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={!validateForm()}
                     >
-                        Sign In
+                        Log In
                     </Button>
                     <Grid container>
                         <Grid item>
-                            <Link href="/sign-up" variant="body2">
-                                {"Don't have an account? Sign Up"}
-                            </Link>
+                            <Typography variant="body2">
+                                {"Don't have an account? "}
+                                <Link href={routes.REGISTER_ROUTE}>Create one</Link>
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Box>

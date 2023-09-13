@@ -10,9 +10,11 @@ import Alert from "@mui/material/Alert";
 import React, { useState } from "react";
 import GroshiClient from "../groshi";
 import { useNavigate } from "react-router-dom";
-import TopbarGuest from "./TopbarGuest";
+import GuestTopBar from "../components/GuestTopBar";
 
-export default function SignUp() {
+import * as routes from "../routes";
+
+export default function Register() {
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
@@ -29,7 +31,7 @@ export default function SignUp() {
         groshi
             .userCreate(username, password1)
             .then((_) => {
-                navigate("/sign-in");
+                navigate(routes.LOGIN_ROUTE);
             })
             .catch((e) => {
                 setErrorMessage(e.toString());
@@ -42,7 +44,7 @@ export default function SignUp() {
 
     return (
         <Container component="main" maxWidth="xs">
-            <TopbarGuest></TopbarGuest>
+            <GuestTopBar register></GuestTopBar>
             <Box
                 sx={{
                     mt: 20,
@@ -89,7 +91,7 @@ export default function SignUp() {
                         value={password2}
                         onChange={(e) => setPassword2(e.target.value)}
                     ></TextField>
-                    {errorMessage && <Alert severity="error">Error: {errorMessage}.</Alert>}
+                    {errorMessage && <Alert severity="error">{errorMessage}.</Alert>}
                     <Button
                         type="submit"
                         fullWidth
@@ -97,13 +99,17 @@ export default function SignUp() {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={!validateForm()}
                     >
-                        Sign Up
+                        Create Account
                     </Button>
+
                     <Grid container justifyContent="flex-start">
                         <Grid item>
-                            <Link href="/sign-in" variant="body2">
-                                Already have an account? Sign in
-                            </Link>
+                            <Typography variant="body2">
+                                {"Already have an account? "}
+                                <Link href={routes.LOGIN_ROUTE} variant="body2">
+                                    Login
+                                </Link>
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Box>

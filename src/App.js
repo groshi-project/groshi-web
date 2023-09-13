@@ -1,42 +1,40 @@
-import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
-import SignIn from "./components/SignIn";
-import Settings from "./components/Settings";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import React from "react";
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
-import SignUp from "./components/SignUp";
 
-const darkTheme = createTheme({
-    palette: {
-        mode: "dark",
-    },
-});
+import Sidebar from "./components/Sidebar";
 
-const lightTheme = createTheme({
-    palette: {
-        mode: "light",
-    },
-});
+import Register from "./views/Register";
+import Index from "./views/Index";
+import Settings from "./views/Settings";
+import Login from "./views/Login";
+import Dashboard from "./views/Dashboard";
+
+import * as routes from "./routes";
+
+const WithSidebarLayout = ({ children }) => (
+    <div>
+        <Sidebar />
+        {children}
+    </div>
+);
 
 export default function App() {
     return (
-        <ThemeProvider theme={lightTheme}>
-            <CssBaseline />
-            <BrowserRouter>
-                <Routes>
-                    <Route path="sign-in" element={<SignIn />} />
-                    <Route path="sign-up" element={<SignUp />} />
+        <BrowserRouter>
+            <Routes>
+                <Route index element={<Index />}></Route>
+                <Route path={routes.LOGIN_ROUTE} element={<Login />} />
+                <Route path={routes.REGISTER_ROUTE} element={<Register />} />
 
-                    <Route index element={<Dashboard />} />
-                    <Route path="settings" element={<Settings />} />
-                </Routes>
-            </BrowserRouter>
-        </ThemeProvider>
+                <Route element={<WithSidebarLayout />}>
+                    <Route path={routes.DASHBOARD_ROUTE} element={<Dashboard />} />
+                    <Route path={routes.SETTINGS_ROUTE} element={<Settings />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
     );
 }
