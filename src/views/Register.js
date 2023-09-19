@@ -8,7 +8,7 @@ import Link from "@mui/material/Link";
 import Checkbox from "@mui/material/Checkbox";
 import Alert from "@mui/material/Alert";
 import React, { useState } from "react";
-import GroshiClient from "../groshi";
+import GroshiAPIClient from "../groshi";
 import { useNavigate } from "react-router-dom";
 import GuestTopBar from "../components/GuestTopBar";
 
@@ -27,7 +27,7 @@ export default function Register() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        let groshi = new GroshiClient();
+        let groshi = new GroshiAPIClient();
         groshi
             .userCreate(username, password1)
             .then((_) => {

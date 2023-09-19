@@ -12,6 +12,7 @@ import Index from "./views/Index";
 import Settings from "./views/Settings";
 import Login from "./views/Login";
 import Dashboard from "./views/Dashboard";
+import Transactions from "./views/Transactions";
 
 import * as routes from "./routes";
 
@@ -32,6 +33,7 @@ export default function App() {
 
                 <Route element={<WithSidebarLayout />}>
                     <Route path={routes.DASHBOARD_ROUTE} element={<Dashboard />} />
+                    <Route path={routes.TRANSACTIONS_ROUTE} element={<Transactions />} />
                     <Route path={routes.SETTINGS_ROUTE} element={<Settings />} />
                 </Route>
             </Routes>

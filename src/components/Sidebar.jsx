@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -7,7 +7,7 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -19,35 +19,107 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Dashboard from "../views/Dashboard";
 import Settings from "../views/Settings";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import Transactions from "../views/Transactions";
+
+import * as routes from "../routes";
 
 const drawerWidth = 220;
 
-const SidebarNavButtons = [
-    {
-        text: "Dashboard",
-        icon: <MenuIcon />,
-        view: <Dashboard />,
-    },
-    {
-        text: "Settings",
-        icon: <SettingsIcon />,
-        view: <Settings />,
-    },
-];
+// const _SidebarNavButtons = {
+//     Dashboard: {
+//         path: "/dashboard",
+//         icon: <MenuIcon />,
+//         view: <Dashboard />,
+//     },
+//     Transactions: {
+//         path: "/transactions",
+//         icon: <ReceiptLongIcon />,
+//         view: <Transactions />,
+//     },
+//     Settings: {
+//         icon: <SettingsIcon />,
+//         path: routes.SETTINGS_ROUTE,
+//         view: <Settings />,
+//     },
+// };
 
-function Sidebar(props) {
+function Placeholder() {
+    return <Box>Loading...</Box>;
+}
+
+class NavItem {
+    name;
+    icon;
+    path;
+    element;
+
+    constructor(name, icon, path, element) {
+        this.name = name;
+        this.icon = icon;
+        this.path = path;
+        this.element = element;
+    }
+}
+
+const NavItemDashboard = new NavItem(
+    "Dashboard",
+    <MenuIcon />,
+    routes.DASHBOARD_ROUTE,
+    <Dashboard />
+);
+
+const NavItemTransactions = new NavItem(
+    "Transactions",
+    <ReceiptLongIcon />,
+    routes.TRANSACTIONS_ROUTE,
+    <Transactions />
+);
+
+const NavItemSettings = new NavItem(
+    "Settings",
+    <SettingsIcon />,
+    routes.SETTINGS_ROUTE,
+    <Settings />
+);
+
+const NavItems = [NavItemDashboard, NavItemTransactions, NavItemSettings];
+
+export default function Sidebar(props) {
     const { window } = props;
-    const navigate = useNavigate();
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [currentView, setCurrentView] = useState(SidebarNavButtons[0].view); // the first button's view is the default one
 
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    const navItemPlaceholder = new NavItem(undefined, undefined, undefined, <Placeholder />);
+    const [selectedNavItem, setSelectedNavItem] = useState(navItemPlaceholder);
+
+    // set current nav item according to the path:
+    useEffect(() => {
+        switch (location.pathname) {
+            case routes.DASHBOARD_ROUTE:
+                setSelectedNavItem(NavItemDashboard);
+                break;
+            case routes.TRANSACTIONS_ROUTE:
+                setSelectedNavItem(NavItemTransactions);
+                break;
+            case routes.SETTINGS_ROUTE:
+                setSelectedNavItem(NavItemSettings);
+                break;
+            default:
+                console.error("Unknown location path " + location.pathname);
+                break;
+        }
+    }, []);
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
     const handleLogOut = () => {
         localStorage.removeItem("token");
-        navigate("/login");
+        navigate(routes.LOGIN_ROUTE);
     };
 
     const drawer = (
@@ -55,17 +127,18 @@ function Sidebar(props) {
             <Toolbar />
             <Divider />
             <List>
-                {SidebarNavButtons.map((button) => (
+                {NavItems.map((navItem) => (
                     <ListItem
-                        key={button.text}
+                        key={navItem.name}
                         disablePadding
                         onClick={() => {
-                            setCurrentView(button.view);
+                            setSelectedNavItem(navItem);
+                            handleDrawerToggle();
                         }}
                     >
-                        <ListItemButton selected={button.view === currentView}>
-                            <ListItemIcon>{button.icon}</ListItemIcon>
-                            <ListItemText primary={button.text} />
+                        <ListItemButton selected={navItem.name === selectedNavItem.name}>
+                            <ListItemIcon>{navItem.icon}</ListItemIcon>
+                            <ListItemText primary={navItem.name} />
                         </ListItemButton>
                     </ListItem>
                 ))}
@@ -148,10 +221,8 @@ function Sidebar(props) {
                 sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
             >
                 <Toolbar />
-                {currentView}
+                {selectedNavItem.element}
             </Box>
         </Box>
     );
 }
-
-export default Sidebar;

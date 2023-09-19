@@ -1,7 +1,5 @@
-// export class GroshiAPIError extends Error {}
-
 export default class GroshiAPIClient {
-    BASE_URL = "http://localhost:80";
+    BASE_URL = "http://192.168.1.32:80";
 
     token = null;
 
@@ -48,7 +46,7 @@ export default class GroshiAPIClient {
         });
     }
 
-    // methods related to users:
+    // methods related to user:
     userCreate(username, password) {
         return this.#sendRequest("POST", "/user", { username: username, password: password });
     }
@@ -57,16 +55,27 @@ export default class GroshiAPIClient {
     transactionCreate() {}
     transactionReadOne() {}
 
-    transactionReadMany() {}
-    transactionsSummary(currency, start_time, end_time) {
+    transactionReadMany(start_time, end_time = new Date(), currency = undefined) {
+        let query_params = {
+            start_time: start_time.toISOString(),
+            end_time: end_time.toISOString(),
+        };
+
+        if (currency !== undefined) {
+            query_params["currency"] = currency;
+        }
+
+        return this.#sendRequest("GET", "/transactions", null, query_params, true);
+    }
+    transactionsSummary(currency, start_time, end_time = new Date()) {
         return this.#sendRequest(
             "GET",
             "/transactions/summary",
             null,
             {
                 currency: currency,
-                start_time: start_time,
-                end_time: end_time,
+                start_time: start_time.toISOString(),
+                end_time: end_time.toISOString(),
             },
             true
         );

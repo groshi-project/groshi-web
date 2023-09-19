@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 
 import Typography from "@mui/material/Typography";
 import { Alert, Box, Checkbox, Container, FormControlLabel, Grid, Link } from "@mui/material";
-import GroshiClient from "../groshi";
+import GroshiAPIClient from "../groshi";
 import GuestTopBar from "../components/GuestTopBar";
 
 import * as routes from "../routes";
@@ -32,7 +32,7 @@ export default function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        let groshi = new GroshiClient();
+        let groshi = new GroshiAPIClient();
 
         groshi
             .authLogin(username, password)
