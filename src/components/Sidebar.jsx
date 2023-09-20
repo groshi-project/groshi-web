@@ -26,24 +26,6 @@ import * as routes from "../routes";
 
 const drawerWidth = 220;
 
-// const _SidebarNavButtons = {
-//     Dashboard: {
-//         path: "/dashboard",
-//         icon: <MenuIcon />,
-//         view: <Dashboard />,
-//     },
-//     Transactions: {
-//         path: "/transactions",
-//         icon: <ReceiptLongIcon />,
-//         view: <Transactions />,
-//     },
-//     Settings: {
-//         icon: <SettingsIcon />,
-//         path: routes.SETTINGS_ROUTE,
-//         view: <Settings />,
-//     },
-// };
-
 function Placeholder() {
     return <Box>Loading...</Box>;
 }

@@ -10,6 +10,7 @@
     "author": "jieggii <jieggii@protonmail.com>",
     "license": "MIT",
     "dependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
         "@fontsource/roboto": "^4.5.8",

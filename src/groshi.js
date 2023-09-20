@@ -1,5 +1,5 @@
 export default class GroshiAPIClient {
-    BASE_URL = "http://192.168.1.32:80";
+    BASE_URL = "http://127.0.0.1:80";
 
     token = null;
 

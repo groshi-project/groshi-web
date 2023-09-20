@@ -23,9 +23,11 @@ const columns = [
         headerName: "Description",
         editable: true,
         sortable: false,
-        // width: 500,
+        width: 500,
     },
 ];
+
+
 export default function Transactions() {
     let navigate = useNavigate();
 
@@ -55,6 +57,7 @@ export default function Transactions() {
         groshi
             .transactionReadMany(startTime, endTime)
             .then((transactions) => {
+                console.log(startTime, endTime, transactions);
                 for (let i = 0; i < transactions.length; i++) {
                     let transaction = transactions[i];
                     let row = {
@@ -84,7 +87,6 @@ export default function Transactions() {
                 rows={rows}
                 columnVisibilityModel={{
                     id: false,
-                    // uuid: false,
                     created_at: false,
                     updated_at: false,
                 }}

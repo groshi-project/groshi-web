@@ -59,8 +59,8 @@ export default function Dashboard() {
     const [yearStart, setYearStart] = useState(null);
     const [yearEnd, setYearEnd] = useState(null);
 
-    const [barChartDates, setBarChartDates] = useState(["01.01", "02.01", "03.01", "04.01"]);
-    const [barChartSummaries, setBarChartSummaries] = useState([5, -5, 2, -2]);
+    // const [barChartDates, setBarChartDates] = useState(["01.01", "02.01", "03.01", "04.01"]);
+    // const [barChartSummaries, setBarChartSummaries] = useState([5, -5, 2, -2]);
 
     // summaries:
     // emptySummary is used as placeholder while fetching actual summaries
@@ -99,8 +99,8 @@ export default function Dashboard() {
         setMonthStart(new Date(date.getFullYear(), date.getMonth(), 1));
         setMonthEnd(new Date(date.getFullYear(), date.getMonth() + 1, 0));
 
-        setYearStart(new Date()); // todo
-        setYearEnd(new Date()); // todo
+        setYearStart(new Date(date.getFullYear(), 0, 1, 0, 0, 0)); // todo
+        setYearEnd(new Date(date.getFullYear(), 12, 31, 23, 59, 59)); // todo
     }, []);
 
     let periods = [
@@ -130,8 +130,8 @@ export default function Dashboard() {
         },
         {
             name: "This year",
-            start_time: yearStart,
-            end_time: yearEnd,
+            start_time: yearStart, // todo
+            end_time: yearEnd, // todo
 
             summary: yearSummary,
             set_summary: setYearSummary,
@@ -163,12 +163,12 @@ export default function Dashboard() {
         for (let i = 0; i < periods.length; i++) {
             groshi
                 .transactionsSummary(currency, periods[i].start_time, periods[i].end_time)
-                .then((resp) => {
+                .then((summary) => {
                     periods[i].set_summary({
-                        income: resp.income / 100,
-                        outcome: resp.outcome / 100,
-                        total: resp.total / 100,
-                        transactions_count: resp.transactions_count,
+                        income: summary.income / 100,
+                        outcome: summary.outcome / 100,
+                        total: summary.total / 100,
+                        transactions_count: summary.transactions_count,
                     });
                 })
                 .catch((e) => {
