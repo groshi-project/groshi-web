@@ -11,7 +11,7 @@ import Register from "./views/Register";
 import Index from "./views/Index";
 import Settings from "./views/Settings";
 import Login from "./views/Login";
-import Dashboard from "./views/Dashboard";
+import Statistics from "./views/Statistics";
 import Transactions from "./views/Transactions";
 
 import * as routes from "./routes";
@@ -32,7 +32,7 @@ export default function App() {
                 <Route path={routes.REGISTER_ROUTE} element={<Register />} />
 
                 <Route element={<WithSidebarLayout />}>
-                    <Route path={routes.DASHBOARD_ROUTE} element={<Dashboard />} />
+                    <Route path={routes.STATISTICS_ROUTE} element={<Statistics />} />
                     <Route path={routes.TRANSACTIONS_ROUTE} element={<Transactions />} />
                     <Route path={routes.SETTINGS_ROUTE} element={<Settings />} />
                 </Route>

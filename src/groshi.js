@@ -55,7 +55,7 @@ export default class GroshiAPIClient {
     transactionCreate() {}
     transactionReadOne() {}
 
-    transactionReadMany(start_time, end_time = new Date(), currency = undefined) {
+    transactionsReadMany(start_time, end_time = new Date(), currency = undefined) {
         let query_params = {
             start_time: start_time.toISOString(),
             end_time: end_time.toISOString(),
@@ -66,6 +66,12 @@ export default class GroshiAPIClient {
         }
 
         return this.#sendRequest("GET", "/transactions", null, query_params, true);
+    }
+
+    transactionsUpdate() {}
+
+    transactionsDelete(uuid) {
+        return this.#sendRequest("DELETE", "/transactions/" + uuid, null, null, true);
     }
     transactionsSummary(currency, start_time, end_time = new Date()) {
         return this.#sendRequest(
@@ -79,5 +85,10 @@ export default class GroshiAPIClient {
             },
             true
         );
+    }
+
+    // methods related to currencies:
+    currenciesRead() {
+        return this.#sendRequest("GET", "/currencies", null, null, false);
     }
 }

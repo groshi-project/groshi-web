@@ -17,12 +17,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Dashboard from "../views/Dashboard";
+import Statistics from "../views/Statistics";
 import Settings from "../views/Settings";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import Transactions from "../views/Transactions";
 
 import * as routes from "../routes";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 
 const drawerWidth = 220;
 
@@ -44,16 +46,16 @@ class NavItem {
     }
 }
 
-const NavItemDashboard = new NavItem(
-    "Dashboard",
-    <MenuIcon />,
-    routes.DASHBOARD_ROUTE,
-    <Dashboard />
+const NavItemStatistics = new NavItem(
+    "Statistics",
+    <BarChartIcon />,
+    routes.STATISTICS_ROUTE,
+    <Statistics />
 );
 
 const NavItemTransactions = new NavItem(
     "Transactions",
-    <ReceiptLongIcon />,
+    <PointOfSaleIcon />,
     routes.TRANSACTIONS_ROUTE,
     <Transactions />
 );
@@ -65,7 +67,7 @@ const NavItemSettings = new NavItem(
     <Settings />
 );
 
-const NavItems = [NavItemDashboard, NavItemTransactions, NavItemSettings];
+const NavItems = [NavItemStatistics, NavItemTransactions, NavItemSettings];
 
 export default function Sidebar(props) {
     const { window } = props;
@@ -81,8 +83,8 @@ export default function Sidebar(props) {
     // set current nav item according to the path:
     useEffect(() => {
         switch (location.pathname) {
-            case routes.DASHBOARD_ROUTE:
-                setSelectedNavItem(NavItemDashboard);
+            case routes.STATISTICS_ROUTE:
+                setSelectedNavItem(NavItemStatistics);
                 break;
             case routes.TRANSACTIONS_ROUTE:
                 setSelectedNavItem(NavItemTransactions);

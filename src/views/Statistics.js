@@ -4,7 +4,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import { Card, Grid, Tooltip, Button } from "@mui/material";
+import { Card, Grid, Tooltip, Button, Alert } from "@mui/material";
 import GroshiAPIClient from "../groshi";
 import { DataGrid } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts";
@@ -16,35 +16,37 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import AddIcon from "@mui/icons-material/Add";
 import { randomNumberBetween } from "@mui/x-data-grid/utils/utils";
+import ErrorSnackbar from "../components/ErrorSnackbar";
 
-function getWindowDimensions() {
-    const { innerWidth: width, innerHeight: height } = window;
-    return {
-        width,
-        height,
-    };
-}
+// function getWindowDimensions() {
+//     const { innerWidth: width, innerHeight: height } = window;
+//     return {
+//         width,
+//         height,
+//     };
+// }
 
-function useWindowDimensions() {
-    const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+// function useWindowDimensions() {
+//     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+//
+//     useEffect(() => {
+//         function handleResize() {
+//             setWindowDimensions(getWindowDimensions());
+//         }
+//
+//         window.addEventListener("resize", handleResize);
+//         return () => window.removeEventListener("resize", handleResize);
+//     }, []);
+//
+//     return windowDimensions;
+// }
 
-    useEffect(() => {
-        function handleResize() {
-            setWindowDimensions(getWindowDimensions());
-        }
-
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    return windowDimensions;
-}
-
-export default function Dashboard() {
+export default function Statistics() {
     const navigate = useNavigate();
 
-    // const [errorMessage, setErrorMessage] = useState(null);
-    const { height, width } = useWindowDimensions();
+    // const { height, width } = useWindowDimensions();
+
+    const [errorMessage, setErrorMessage] = useState(null);
 
     // time periods for summary counters:
     const [dayStart, setDayStart] = useState(null);
@@ -172,6 +174,7 @@ export default function Dashboard() {
                     });
                 })
                 .catch((e) => {
+                    setErrorMessage(e.message);
                     console.log(
                         "Error while fetching '" + periods[i].name + "' summary: " + e.toString()
                     );
@@ -219,6 +222,7 @@ export default function Dashboard() {
 
     return (
         <Box mt={2}>
+            <ErrorSnackbar errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
             <Grid container spacing={4}>
                 {periods.map((period) => (
                     <Grid key={period.name} item xs={12} md={3} textAlign="center">

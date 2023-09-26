@@ -22,7 +22,7 @@ export default function Login() {
     // redirect user to the dashboard if token is already stored:
     useEffect(() => {
         if (localStorage.getItem("token")) {
-            navigate(routes.DASHBOARD_ROUTE);
+            navigate(routes.STATISTICS_ROUTE);
         }
     }, []);
 
@@ -38,7 +38,7 @@ export default function Login() {
             .authLogin(username, password)
             .then((response) => {
                 localStorage.setItem("token", response.token);
-                navigate(routes.DASHBOARD_ROUTE);
+                navigate(routes.STATISTICS_ROUTE);
             })
             .catch((e) => {
                 setErrorMessage(e.toString());
@@ -86,6 +86,7 @@ export default function Login() {
                         onChange={(e) => setPassword(e.target.value)}
                         error={errorMessage != null}
                     />
+
                     {errorMessage && <Alert severity="error">{errorMessage}.</Alert>}
                     <Button
                         type="submit"

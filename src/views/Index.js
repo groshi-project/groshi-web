@@ -7,7 +7,7 @@ export default function Index() {
 
     useEffect(() => {
         if (localStorage.getItem("token")) {
-            navigate(routes.DASHBOARD_ROUTE);
+            navigate(routes.STATISTICS_ROUTE);
         } else {
             navigate(routes.LOGIN_ROUTE);
         }
