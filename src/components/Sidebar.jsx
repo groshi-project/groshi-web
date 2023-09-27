@@ -19,7 +19,6 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Statistics from "../views/Statistics";
 import Settings from "../views/Settings";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import Transactions from "../views/Transactions";
 
 import * as routes from "../routes";
