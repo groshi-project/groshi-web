@@ -35,38 +35,6 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import * as dateutls from "../utils/dateutils";
 import ErrorSnackbar from "../components/ErrorSnackbar";
 
-// const CURRENCIES = ["USD", "EUR", "RUB"];
-
-const initialRows = [
-    {
-        date: randomCreatedDate(),
-        amount: 50,
-        currency: "EUR",
-        created_at: randomCreatedDate(),
-        updated_at: randomUpdatedDate(),
-        id: randomId(),
-        uuid: randomId(),
-    },
-    {
-        date: randomCreatedDate(),
-        amount: -5000,
-        currency: "RUB",
-        created_at: randomCreatedDate(),
-        updated_at: randomUpdatedDate(),
-        id: randomId(),
-        uuid: randomId(),
-    },
-    {
-        date: randomCreatedDate(),
-        amount: -20,
-        currency: "USD",
-        created_at: randomCreatedDate(),
-        updated_at: randomUpdatedDate(),
-        id: randomId(),
-        uuid: randomId(),
-    },
-];
-
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
 
@@ -93,7 +61,7 @@ function EditToolbar(props) {
 function TransactionsGrid(props) {
     // const navigate = useNavigate();
 
-    const { groshi, rows, setRows } = props;
+    const { groshi, supportedCurrencies, rows, setRows } = props;
     const [rowModesModel, setRowModesModel] = useState({});
 
     // const [rows, setRows] = useState(initialRows);
@@ -169,7 +137,7 @@ function TransactionsGrid(props) {
             field: "currency",
             headerName: "Currency",
             type: "singleSelect",
-            valueOptions: ["RUB", "EUR", "USD"], // todo
+            valueOptions: supportedCurrencies, // todo
             editable: true,
         },
         {
@@ -406,7 +374,12 @@ export default function Transactions() {
                 </LocalizationProvider>
             </Box>
 
-            <TransactionsGrid groshi={groshi} rows={rows} setRows={setRows} />
+            <TransactionsGrid
+                groshi={groshi}
+                supportedCurrencies={supportedCurrencies}
+                rows={rows}
+                setRows={setRows}
+            />
         </Box>
     );
 }
