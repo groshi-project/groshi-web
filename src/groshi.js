@@ -32,6 +32,7 @@ export default class GroshiAPIClient {
         }).then((response) => {
             return response.json().then((data) => {
                 if (response.status !== 200) {
+                    // console.log("Error details:", data.error_details);
                     throw new Error(data.error_message);
                 }
                 return data;
@@ -52,36 +53,69 @@ export default class GroshiAPIClient {
     }
 
     // methods related to transactions:
-    transactionCreate() {}
-    transactionReadOne() {}
+    transactionsCreate(amount, currency, description, timestamp = new Date()) {
+        return this.#sendRequest(
+            "POST",
+            "/transactions",
+            {
+                amount: amount,
+                currency: currency,
+                description: description,
+                timestamp: timestamp.toISOString(),
+            },
+            null,
+            true
+        );
+    }
 
-    transactionsReadMany(start_time, end_time = new Date(), currency = undefined) {
+    transactionsReadMany(startTime, endTime = new Date(), currency = null) {
         let query_params = {
-            start_time: start_time.toISOString(),
-            end_time: end_time.toISOString(),
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
         };
 
-        if (currency !== undefined) {
+        if (currency) {
             query_params["currency"] = currency;
         }
 
         return this.#sendRequest("GET", "/transactions", null, query_params, true);
     }
 
-    transactionsUpdate() {}
+    transactionsUpdate(
+        uuid,
+        newAmount = null,
+        newCurrency = null,
+        newDescription = null,
+        newTimestamp = null
+    ) {
+        let body = {};
+        if (newAmount) {
+            body["new_amount"] = newAmount;
+        }
+        if (newCurrency) {
+            body["new_currency"] = newCurrency;
+        }
+        if (newDescription) {
+            body["new_description"] = newDescription;
+        }
+        if (newTimestamp) {
+            body["new_timestamp"] = newTimestamp.toISOString();
+        }
+        return this.#sendRequest("PUT", "/transactions/" + uuid, body, null, true);
+    }
 
     transactionsDelete(uuid) {
         return this.#sendRequest("DELETE", "/transactions/" + uuid, null, null, true);
     }
-    transactionsSummary(currency, start_time, end_time = new Date()) {
+    transactionsSummary(currency, startTime, endTime = new Date()) {
         return this.#sendRequest(
             "GET",
             "/transactions/summary",
             null,
             {
                 currency: currency,
-                start_time: start_time.toISOString(),
-                end_time: end_time.toISOString(),
+                start_time: startTime.toISOString(),
+                end_time: endTime.toISOString(),
             },
             true
         );
