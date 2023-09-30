@@ -43,7 +43,7 @@ function EditToolbar(props) {
         setRows((oldRows) => [...oldRows, { id, amount: 0, currency: "", isNew: true }]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
-            [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" }, //todo
+            [id]: { mode: GridRowModes.Edit, fieldToFocus: "currency" }, //todo
         }));
     };
 
@@ -59,12 +59,10 @@ function EditToolbar(props) {
 }
 
 function TransactionsGrid(props) {
-    // const navigate = useNavigate();
+    // todo: use different error message rather than setErrorMessage from Trasactions view
+    const { groshi, supportedCurrencies, rows, setRows, setErrorMessage } = props;
 
-    const { groshi, supportedCurrencies, rows, setRows } = props;
     const [rowModesModel, setRowModesModel] = useState({});
-
-    // const [rows, setRows] = useState(initialRows);
 
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -81,10 +79,20 @@ function TransactionsGrid(props) {
     };
 
     const handleDeleteClick = (id) => () => {
+        for (const row of rows) {
+            if (row.id === id) {
+                groshi
+                    .transactionsDelete(row.uuid)
+                    .then((transaction) => {
+                        console.log("Deleted transaction:", transaction);
+                    })
+                    .catch((e) => {
+                        setErrorMessage(`Failed to delete transaction: ${e.message}`);
+                    });
+                break;
+            }
+        }
         setRows(rows.filter((row) => row.id !== id));
-        console.log(groshi);
-        // groshi.transactionsDelete(); todo
-        console.log("delete row: ", id);
     };
 
     const handleCancelClick = (id) => () => {
@@ -100,9 +108,63 @@ function TransactionsGrid(props) {
     };
 
     const processRowUpdate = (newRow) => {
+        if (newRow.isNew) {
+            // if row was created using CREATE button
+            groshi
+                .transactionsCreate(
+                    Math.round(newRow.amount * 100),
+                    newRow.currency,
+                    newRow.description,
+                    newRow.timestamp
+                )
+                .then((transaction) => {
+                    console.log("Created new transaction:", transaction);
+                })
+                .catch((e) => {
+                    console.log("Error creating new transaction:", e);
+                });
+        } else {
+            // if row was edited using EDIT button
+            for (let row of rows) {
+                if (row.id === newRow.id) {
+                    let newAmount = null;
+                    let newCurrency = null;
+                    let newDescription = null;
+                    let newTimestamp = null;
+
+                    if (newRow.amount !== row.amount) {
+                        newAmount = newRow.amount;
+                    }
+                    if (newRow.currency !== row.currency) {
+                        newCurrency = newRow.currency;
+                    }
+                    if (newRow.description !== row.description) {
+                        newDescription = newRow.description;
+                    }
+                    if (newRow.timestamp !== row.timestamp) {
+                        newTimestamp = newRow.timestamp;
+                    }
+                    groshi
+                        .transactionsUpdate(
+                            row.uuid,
+                            Math.round(newAmount * 100),
+                            newCurrency,
+                            newDescription,
+                            newTimestamp
+                        )
+                        .then((transaction) => {
+                            console.log("Updated transaction:", transaction);
+                        })
+                        .catch((e) => {
+                            console.log("Failed to update transaction", e);
+                        });
+                    break;
+                }
+            }
+        }
+
         const updatedRow = { ...newRow, isNew: false };
         setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-        console.log("update row:", newRow);
         return updatedRow;
     };
 
@@ -141,19 +203,25 @@ function TransactionsGrid(props) {
             editable: true,
         },
         {
-            // hidden col
-            field: "created_at",
-            type: "dateTime",
-            headerName: "Created at",
-            width: 175,
+            field: "description",
+            headerName: "Description",
+            editable: true,
+            width: 500,
         },
-        {
-            // hidden col
-            field: "updated_at",
-            type: "dateTime",
-            headerName: "Updated at",
-            width: 175,
-        },
+        // {
+        //     // hidden col
+        //     field: "created_at",
+        //     type: "dateTime",
+        //     headerName: "Created at",
+        //     width: 175,
+        // },
+        // {
+        //     // hidden col
+        //     field: "updated_at",
+        //     type: "dateTime",
+        //     headerName: "Updated at",
+        //     width: 175,
+        // },
         {
             field: "actions",
             type: "actions",
@@ -287,7 +355,7 @@ export default function Transactions() {
                 setSupportedCurrencies(currencies);
             })
             .catch((e) => {
-                console.log("Error fetching supported currencies: " + e.toString());
+                console.log("Error fetching supported currencies:", e);
                 setErrorMessage(e.toString());
             });
     }, [groshi]);
@@ -312,6 +380,7 @@ export default function Transactions() {
                         uuid: transaction.uuid,
                         date: new Date(transaction.timestamp),
                         amount: transaction.amount / 100,
+                        description: transaction.description,
                         currency: transaction.currency,
                     };
                     setRows((rows) => [...rows, row]);
@@ -319,7 +388,7 @@ export default function Transactions() {
             })
             .catch((e) => {
                 setErrorMessage(e.message);
-                console.log("Error fetching transactions: " + e.toString());
+                console.log("Error fetching transactions:", e);
             });
     }, [groshi, currency, startTime, endTime]);
 
@@ -336,7 +405,6 @@ export default function Transactions() {
                         label="Display all amounts in"
                         onChange={(e) => {
                             setCurrency(e.target.value);
-                            console.log(e.target.value);
                         }}
                         sx={{ width: 200, marginRight: 1 }}
                     >
@@ -379,6 +447,7 @@ export default function Transactions() {
                 supportedCurrencies={supportedCurrencies}
                 rows={rows}
                 setRows={setRows}
+                setErrorMessage={setErrorMessage}
             />
         </Box>
     );
