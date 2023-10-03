@@ -127,7 +127,7 @@ function TransactionsGrid(props) {
                 children: "Some fields are missing or filled incorrectly",
                 severity: "error",
             });
-            return null;
+            return;
         }
 
         if (newRow.isNew) {
@@ -183,6 +183,7 @@ function TransactionsGrid(props) {
                     // ensure that anything has been updated:
                     if (!newAmount && !newCurrency && !newDescription && !newTimestamp) {
                         console.info("Nothing to update");
+                        setSnackbar({ children: "Nothing to update", severity: "error" });
                         return newRow;
                     }
 
@@ -334,10 +335,8 @@ function TransactionsGrid(props) {
                 columns={columns}
                 editMode="row"
                 columnVisibilityModel={{
-                    id: false, // todo
-                    uuid: false, // todo
-                    created_at: false, // todo
-                    updated_at: false, // todo
+                    id: false,
+                    uuid: false,
                 }}
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
