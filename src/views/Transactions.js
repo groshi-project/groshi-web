@@ -8,6 +8,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import {
     GridRowModes,
     DataGrid,
@@ -62,7 +64,10 @@ function TransactionsGrid(props) {
     // todo: use different error message rather than setErrorMessage from Trasactions view
     const { groshi, supportedCurrencies, rows, setRows, setErrorMessage } = props;
 
+    const [snackbar, setSnackbar] = useState(null);
     const [rowModesModel, setRowModesModel] = useState({});
+
+    const handleCloseSnackbar = () => setSnackbar(null);
 
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -84,10 +89,18 @@ function TransactionsGrid(props) {
                 groshi
                     .transactionsDelete(row.uuid)
                     .then((transaction) => {
-                        console.log("Deleted transaction:", transaction);
+                        console.info("Deleted transaction:", transaction);
+                        setSnackbar({
+                            children: "Transaction successfully deleted",
+                            severity: "success",
+                        });
                     })
                     .catch((e) => {
-                        setErrorMessage(`Failed to delete transaction: ${e.message}`);
+                        console.error("Failed to delete transaction:", e);
+                        setSnackbar({
+                            children: "Failed to delete transaction",
+                            severity: "error",
+                        });
                     });
                 break;
             }
@@ -107,22 +120,44 @@ function TransactionsGrid(props) {
         }
     };
 
-    const processRowUpdate = (newRow) => {
+    const processRowUpdate = async (newRow) => {
+        // ensure that all necessary fields are set and set correctly:
+        if (!newRow.date || newRow.amount === 0 || !newRow.currency) {
+            setSnackbar({
+                children: "Some fields are missing or filled incorrectly",
+                severity: "error",
+            });
+            return null;
+        }
+
         if (newRow.isNew) {
             // if row was created using CREATE button
-            groshi
-                .transactionsCreate(
-                    Math.round(newRow.amount * 100),
-                    newRow.currency,
-                    newRow.description,
-                    newRow.timestamp
-                )
-                .then((transaction) => {
-                    console.log("Created new transaction:", transaction);
-                })
-                .catch((e) => {
-                    console.log("Error creating new transaction:", e);
+            try {
+                const transaction = await new Promise((resolve, reject) => {
+                    groshi
+                        .transactionsCreate(
+                            Math.round(newRow.amount * 100),
+                            newRow.currency,
+                            newRow.description,
+                            newRow.timestamp
+                        )
+                        .then((transaction) => {
+                            resolve(transaction);
+                        })
+                        .catch((e) => {
+                            reject(e);
+                        });
                 });
+                newRow.uuid = transaction.uuid;
+                console.info("Created a new transaction:", transaction);
+                setSnackbar({
+                    children: "Transaction successfully created",
+                    severity: "success",
+                });
+            } catch (e) {
+                console.error("Failed to create a new transaction:", e);
+                setErrorMessage("Could not create a new transaction");
+            }
         } else {
             // if row was edited using EDIT button
             for (let row of rows) {
@@ -144,6 +179,13 @@ function TransactionsGrid(props) {
                     if (newRow.timestamp !== row.timestamp) {
                         newTimestamp = newRow.timestamp;
                     }
+
+                    // ensure that anything has been updated:
+                    if (!newAmount && !newCurrency && !newDescription && !newTimestamp) {
+                        console.info("Nothing to update");
+                        return newRow;
+                    }
+
                     groshi
                         .transactionsUpdate(
                             row.uuid,
@@ -153,16 +195,20 @@ function TransactionsGrid(props) {
                             newTimestamp
                         )
                         .then((transaction) => {
-                            console.log("Updated transaction:", transaction);
+                            console.info("Updated transaction:", transaction);
+                            setSnackbar({
+                                children: "Transaction successfully updated",
+                                severity: "success",
+                            });
                         })
                         .catch((e) => {
                             console.log("Failed to update transaction", e);
+                            setErrorMessage("Failed to update transaction: " + e.toString());
                         });
                     break;
                 }
             }
         }
-
         const updatedRow = { ...newRow, isNew: false };
         setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
         return updatedRow;
@@ -297,6 +343,7 @@ function TransactionsGrid(props) {
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
+                onProcessRowUpdateError={(error) => console.error(error)}
                 slots={{
                     toolbar: EditToolbar,
                 }}
@@ -304,6 +351,16 @@ function TransactionsGrid(props) {
                     toolbar: { setRows, setRowModesModel },
                 }}
             />
+            {!!snackbar && (
+                <Snackbar
+                    open
+                    anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                    onClose={handleCloseSnackbar}
+                    autoHideDuration={4000}
+                >
+                    <Alert {...snackbar} onClose={handleCloseSnackbar} />
+                </Snackbar>
+            )}
         </Box>
     );
 }
@@ -394,7 +451,9 @@ export default function Transactions() {
 
     return (
         <Box>
-            <ErrorSnackbar errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+            {errorMessage && (
+                <ErrorSnackbar errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+            )}
             <Box sx={{ marginBottom: 1 }}>
                 <FormControl>
                     <InputLabel id="currency-select-label">Display all amounts in</InputLabel>
