@@ -1,5 +1,7 @@
+import { GROSHI_SOCKET } from "./config";
+
 export default class GroshiAPIClient {
-    BASE_URL = "http://127.0.0.1:80";
+    BASE_URL = GROSHI_SOCKET.replace(/\/+$/, "");
 
     token = null;
 
