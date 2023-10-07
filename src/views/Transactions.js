@@ -32,10 +32,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 import GroshiAPIClient from "../groshi";
 import * as routes from "../routes";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import * as dateutls from "../utils/dateutils";
-import ErrorSnackbar from "../components/ErrorSnackbar";
+import * as dateutils from "../utils/dateutils";
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
@@ -61,8 +59,7 @@ function EditToolbar(props) {
 }
 
 function TransactionsGrid(props) {
-    // todo: use different error message rather than setErrorMessage from Trasactions view
-    const { groshi, supportedCurrencies, rows, setRows, setErrorMessage } = props;
+    const { groshi, supportedCurrencyCodes, rows, setRows } = props;
 
     const [snackbar, setSnackbar] = useState(null);
     const [rowModesModel, setRowModesModel] = useState({});
@@ -89,23 +86,23 @@ function TransactionsGrid(props) {
                 groshi
                     .transactionsDelete(row.uuid)
                     .then((transaction) => {
-                        console.info("Deleted transaction:", transaction);
+                        setRows(rows.filter((row) => row.id !== id));
                         setSnackbar({
                             children: "Transaction successfully deleted",
                             severity: "success",
                         });
+                        console.info("Deleted transaction:", transaction);
                     })
                     .catch((e) => {
-                        console.error("Failed to delete transaction:", e);
                         setSnackbar({
-                            children: "Failed to delete transaction",
+                            children: "Failed to delete transaction on the server",
                             severity: "error",
                         });
+                        console.error("Failed to delete transaction:", e);
                     });
                 break;
             }
         }
-        setRows(rows.filter((row) => row.id !== id));
     };
 
     const handleCancelClick = (id) => () => {
@@ -156,7 +153,6 @@ function TransactionsGrid(props) {
                 });
             } catch (e) {
                 console.error("Failed to create a new transaction:", e);
-                setErrorMessage("Could not create a new transaction");
             }
         } else {
             // if row was edited using EDIT button
@@ -203,8 +199,7 @@ function TransactionsGrid(props) {
                             });
                         })
                         .catch((e) => {
-                            console.log("Failed to update transaction", e);
-                            setErrorMessage("Failed to update transaction: " + e.toString());
+                            console.error("Failed to update transaction:", e);
                         });
                     break;
                 }
@@ -246,7 +241,7 @@ function TransactionsGrid(props) {
             field: "currency",
             headerName: "Currency",
             type: "singleSelect",
-            valueOptions: supportedCurrencies, // todo
+            valueOptions: supportedCurrencyCodes,
             editable: true,
         },
         {
@@ -371,9 +366,9 @@ export default function Transactions() {
 
     const [groshi, setGroshi] = useState(null);
 
-    const [errorMessage, setErrorMessage] = useState(null);
+    // const [errorMessage, setErrorMessage] = useState(null);
 
-    const [supportedCurrencies, setSupportedCurrencies] = useState([]);
+    const [supportedCurrencyCodes, setSupportedCurrencyCodes] = useState([]);
 
     // view settings:
     const [currency, setCurrency] = useState(ORIGINAL_CURRENCY);
@@ -385,7 +380,8 @@ export default function Transactions() {
 
     // set default startTime and endTime (current month period):
     useEffect(() => {
-        let [monthStart, monthEnd] = dateutls.CalculateMonthPeriod();
+        const monthStart = dateutils.monthStart();
+        const monthEnd = dateutils.monthEnd();
         setStartTime(monthStart);
         setEndTime(monthEnd);
     }, []);
@@ -408,11 +404,14 @@ export default function Transactions() {
         groshi
             .currenciesRead()
             .then((currencies) => {
-                setSupportedCurrencies(currencies);
+                let currencyCodes = [];
+                for (const item of currencies) {
+                    currencyCodes.push(item.code);
+                }
+                setSupportedCurrencyCodes(currencyCodes);
             })
             .catch((e) => {
-                console.log("Error fetching supported currencies:", e);
-                setErrorMessage(e.toString());
+                console.error("Error fetching supported currencies:", e);
             });
     }, [groshi]);
 
@@ -443,16 +442,12 @@ export default function Transactions() {
                 });
             })
             .catch((e) => {
-                setErrorMessage(e.message);
-                console.log("Error fetching transactions:", e);
+                console.error("Error fetching transactions:", e);
             });
     }, [groshi, currency, startTime, endTime]);
 
     return (
         <Box>
-            {errorMessage && (
-                <ErrorSnackbar errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
-            )}
             <Box sx={{ marginBottom: 1 }}>
                 <FormControl>
                     <InputLabel id="currency-select-label">Display all amounts in</InputLabel>
@@ -466,12 +461,12 @@ export default function Transactions() {
                         }}
                         sx={{ width: 200, marginRight: 1 }}
                     >
-                        <MenuItem key={ORIGINAL_CURRENCY} value={ORIGINAL_CURRENCY}>
+                        <MenuItem divider key={ORIGINAL_CURRENCY} value={ORIGINAL_CURRENCY}>
                             {ORIGINAL_CURRENCY}
                         </MenuItem>
-                        {supportedCurrencies.map((currency) => (
-                            <MenuItem key={currency} value={currency}>
-                                {currency}
+                        {supportedCurrencyCodes.map((code) => (
+                            <MenuItem key={code} value={code}>
+                                {code}
                             </MenuItem>
                         ))}
                     </Select>
@@ -502,10 +497,9 @@ export default function Transactions() {
 
             <TransactionsGrid
                 groshi={groshi}
-                supportedCurrencies={supportedCurrencies}
+                supportedCurrencyCodes={supportedCurrencyCodes}
                 rows={rows}
                 setRows={setRows}
-                setErrorMessage={setErrorMessage}
             />
         </Box>
     );

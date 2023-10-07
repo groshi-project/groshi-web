@@ -17,6 +17,12 @@ import ListItemText from "@mui/material/ListItemText";
 import AddIcon from "@mui/icons-material/Add";
 import { randomNumberBetween } from "@mui/x-data-grid/utils/utils";
 import ErrorSnackbar from "../components/ErrorSnackbar";
+import {
+    SETTINGS_PRIMARY_CURRENCY_CODE,
+    SETTINGS_PRIMARY_CURRENCY_SYMBOL,
+    TOKEN,
+} from "../localstorageKeys";
+import * as dateutil from "../utils/dateutils";
 
 // function getWindowDimensions() {
 //     const { innerWidth: width, innerHeight: height } = window;
@@ -41,220 +47,215 @@ import ErrorSnackbar from "../components/ErrorSnackbar";
 //     return windowDimensions;
 // }
 
-export default function Statistics() {
-    const navigate = useNavigate();
+function SummariesRow(props) {
+    const { groshi, primaryCurrency } = props;
 
-    // const { height, width } = useWindowDimensions();
-
-    const [errorMessage, setErrorMessage] = useState(null);
-
-    // time periods for summary counters:
-    const [dayStart, setDayStart] = useState(null);
-    const [dayEnd, setDayEnd] = useState(null);
-
-    const [weekStart, setWeekStart] = useState(null);
-    const [weekEnd, setWeekEnd] = useState(null);
-
-    const [monthStart, setMonthStart] = useState(null);
-    const [monthEnd, setMonthEnd] = useState(null);
-
-    const [yearStart, setYearStart] = useState(null);
-    const [yearEnd, setYearEnd] = useState(null);
-
-    // const [barChartDates, setBarChartDates] = useState(["01.01", "02.01", "03.01", "04.01"]);
-    // const [barChartSummaries, setBarChartSummaries] = useState([5, -5, 2, -2]);
-
-    // summaries:
-    // emptySummary is used as placeholder while fetching actual summaries
     const emptySummary = {
         income: 0,
         outcome: 0,
         total: 0,
         transactions_count: 0,
     };
+
     const [daySummary, setDaySummary] = useState(emptySummary);
     const [weekSummary, setWeekSummary] = useState(emptySummary);
     const [monthSummary, setMonthSummary] = useState(emptySummary);
     const [yearSummary, setYearSummary] = useState(emptySummary);
 
-    // currency information:
-    const [currency, setCurrency] = useState();
-    const [currencySymbol, setCurrencySymbol] = useState("");
-
-    // fetch currency information:
+    const [periods, setPeriods] = useState({
+        dayStart: null,
+        dayEnd: null,
+        weekStart: null,
+        weekEnd: null,
+        monthStart: null,
+        monthEnd: null,
+        yearStart: null,
+        yearEnd: null,
+    });
     useEffect(() => {
-        // todo: fetch currency from settings
-        setCurrency("USD");
-        setCurrencySymbol("$");
+        setPeriods({
+            dayStart: dateutil.dayStart(),
+            dayEnd: dateutil.dayEnd(),
+
+            weekStart: dateutil.weekStart(1), //todo
+            weekEnd: dateutil.weekEnd(1), //todo
+
+            monthStart: dateutil.monthStart(),
+            monthEnd: dateutil.monthEnd(),
+
+            yearStart: dateutil.yearStart(),
+            yearEnd: dateutil.yearEnd(),
+        });
     }, []);
 
-    // calculate necessary time periods:
-    useEffect(() => {
-        let date = new Date();
-
-        setDayStart(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
-        setDayEnd(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59));
-
-        setWeekStart(new Date()); // todo
-        setWeekEnd(new Date()); // todo
-
-        setMonthStart(new Date(date.getFullYear(), date.getMonth(), 1));
-        setMonthEnd(new Date(date.getFullYear(), date.getMonth() + 1, 0));
-
-        setYearStart(new Date(date.getFullYear(), 0, 1, 0, 0, 0)); // todo
-        setYearEnd(new Date(date.getFullYear(), 12, 31, 23, 59, 59)); // todo
-    }, []);
-
-    let periods = [
+    const summaries = [
         {
-            name: "Today",
-            start_time: dayStart,
-            end_time: dayEnd,
+            title: "Today",
+            start: periods.dayStart,
+            end: periods.dayEnd,
 
             summary: daySummary,
-            set_summary: setDaySummary,
+            setSummary: setDaySummary,
         },
         {
-            name: "This week",
-            start_time: weekStart, // todo
-            end_time: weekEnd, // todo
+            title: "This week",
+            start: periods.weekStart,
+            end: periods.weekEnd,
 
             summary: weekSummary,
-            set_summary: setWeekSummary,
+            setSummary: setWeekSummary,
         },
         {
-            name: "This month",
-            start_time: monthStart,
-            end_time: monthEnd,
+            title: "This month",
+            start: periods.monthStart,
+            end: periods.monthEnd,
 
             summary: monthSummary,
-            set_summary: setMonthSummary,
+            setSummary: setMonthSummary,
         },
         {
-            name: "This year",
-            start_time: yearStart, // todo
-            end_time: yearEnd, // todo
+            title: "This year",
+            start: periods.yearStart,
+            end: periods.yearEnd,
 
             summary: yearSummary,
-            set_summary: setYearSummary,
+            setSummary: setYearSummary,
         },
     ];
 
-    // fetch summaries:
-    let deps = [currency]; // dependencies for this effect
-    for (let i = 0; i < periods.length; i++) {
-        deps.push(periods[i].start_time, periods[i].end_time);
-    }
+    // fetch summaries for all periods:
     useEffect(() => {
-        // ensure that all deps are not null:
-        for (let i = 0; i < deps.length; i++) {
-            if (deps[i] === null) {
-                return;
-            }
-        }
-
-        let token = localStorage.getItem("token");
-        if (!token) {
-            navigate(routes.LOGIN_ROUTE);
+        if (!groshi || !primaryCurrency) {
             return;
         }
-
-        let groshi = new GroshiAPIClient(token);
-
-        // fetch and set summaries:
-        for (let i = 0; i < periods.length; i++) {
+        for (const summary of summaries) {
             groshi
-                .transactionsSummary(currency, periods[i].start_time, periods[i].end_time)
-                .then((summary) => {
-                    periods[i].set_summary({
-                        income: summary.income / 100,
-                        outcome: summary.outcome / 100,
-                        total: summary.total / 100,
-                        transactions_count: summary.transactions_count,
+                .transactionsSummary(primaryCurrency.code, summary.start, summary.end)
+                .then((resp) => {
+                    summary.setSummary({
+                        income: resp.income / 100,
+                        outcome: resp.outcome / 100,
+                        total: resp.total / 100,
+                        transactions_count: resp.transactions_count,
                     });
                 })
                 .catch((e) => {
-                    setErrorMessage(e.message);
-                    console.log(
-                        "Error while fetching '" + periods[i].name + "' summary: " + e.toString()
-                    );
+                    console.error("Error while fetching '" + summary.title + "' summary:", e);
                 });
         }
-    }, deps);
+    }, [groshi, primaryCurrency]);
 
+    return (
+        <Grid container spacing={4}>
+            {summaries.map((summary) => (
+                <Grid item key={summary.title} xs={12} md={3} textAlign="center">
+                    <Typography variant="h2" fontWeight="normal">
+                        {
+                            // place "-" sign before the currency symbol if the summary amount is negative:
+                            summary.summary.total >= 0
+                                ? primaryCurrency.symbol + summary.summary.total
+                                : "-" + primaryCurrency.symbol + -summary.summary.total
+                        }
+                    </Typography>
+                    <Typography variant="subtitle2">
+                        <span color="green" style={{ color: "green" }}>
+                            +{primaryCurrency.symbol}
+                            {summary.summary.income}
+                        </span>
+                        <span>, </span>
+                        <span style={{ color: "red" }}>
+                            -{primaryCurrency.symbol}
+                            {summary.summary.outcome}
+                        </span>
+                    </Typography>
+                    <Typography variant="subtitle1">
+                        <b>{summary.name}</b>{" "}
+                        <Tooltip title="Transactions count">
+                            <span>({summary.summary.transactions_count})</span>
+                        </Tooltip>
+                    </Typography>
+                </Grid>
+            ))}
+        </Grid>
+    );
+}
+
+export default function StatisticsView() {
+    const navigate = useNavigate();
+
+    // const { height, width } = useWindowDimensions();
+    const [groshi, setGroshi] = useState(null);
+
+    // currency information:
+    const [primaryCurrency, setPrimaryCurrency] = useState({ code: "", symbol: "" });
+
+    // initialize groshi:
     useEffect(() => {
-        // ensure that month start and month end have been set
-        if (!monthStart || !monthEnd) {
-            return;
-        }
-
-        let token = localStorage.getItem("token");
+        let token = localStorage.getItem(TOKEN);
         if (!token) {
             navigate(routes.LOGIN_ROUTE);
             return;
         }
-        // let groshi = new GroshiAPIClient(token);
-        // groshi
-        //     .transactionReadMany(monthStart.toISOString(), monthEnd.toISOString())
-        //     .then((resp) => {
-        //         let monthDays = {};
-        //
-        //         for (let i = 0; i < resp.length; i++) {
-        //             let transactionDay = new Date(resp.timestamp).getDay();
-        //             if (monthDays.hasOwnProperty(transactionDay)) {
-        //             } else {
-        //                 monthDays[transactionDay] = resp.amount;
-        //             }
-        //         }
-        //     })
-        //     .catch((e) => {
-        //         console.log("Error while fetching transactions: " + e.toString());
-        //     });
-    }, [monthStart, monthEnd]);
-    // let days = [];
-    // let values = [];
-    //
-    // for (let i = 1; i < 31; i++) {
-    //     days.push(i + ".01");
-    //     // values.push(randomNumberBetween(2 * i * i * 5, -100, 100)());
-    // }
-    // values.push(1);
+        setGroshi(new GroshiAPIClient(token));
+    }, []);
+
+    // read primary currency:
+    useEffect(() => {
+        const code = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_CODE);
+        const symbol = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_SYMBOL);
+
+        if (code && symbol) {
+            setPrimaryCurrency({ code: code, symbol: symbol });
+        } else {
+            setPrimaryCurrency({ code: "USD", symbol: "$" });
+        }
+    }, []);
 
     return (
         <Box mt={2}>
-            <ErrorSnackbar errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
-            <Grid container spacing={4}>
-                {periods.map((period) => (
-                    <Grid key={period.name} item xs={12} md={3} textAlign="center">
-                        <Typography variant="h2" fontWeight="normal">
-                            {
-                                // place "-" sign before the currency symbol if the summary amount is negative:
-                                period.summary.total >= 0
-                                    ? currencySymbol + period.summary.total
-                                    : "-" + currencySymbol + -period.summary.total
-                            }
-                        </Typography>
-                        <Typography variant="subtitle2">
-                            <span color="green" style={{ color: "green" }}>
-                                +{currencySymbol}
-                                {period.summary.income}
-                            </span>
-                            <span>, </span>
-                            <span style={{ color: "red" }}>
-                                -{currencySymbol}
-                                {period.summary.outcome}
-                            </span>
-                        </Typography>
-                        <Typography variant="subtitle1">
-                            <b>{period.name}</b>{" "}
-                            <Tooltip title="Transactions count">
-                                <span>({period.summary.transactions_count})</span>
-                            </Tooltip>
-                        </Typography>
-                    </Grid>
-                ))}
-            </Grid>
+            <SummariesRow groshi={groshi} primaryCurrency={primaryCurrency} />
 
+            <Grid container spacing={4} mt={3}>
+                <Grid item md={6} sm={12}>
+                    <Box>
+                        <BarChart
+                            xAxis={[
+                                {
+                                    scaleType: "band",
+                                    data: ["January", "February", "March", "April", "May", "June"],
+                                },
+                            ]}
+                            series={[
+                                {
+                                    data: [543, 902, 745, 925, 613, 964],
+                                    label: "Income",
+                                    color: "green",
+                                },
+                                {
+                                    data: [955, 912, 912, 964, 849, 515],
+                                    label: "Outcome",
+                                    color: "red",
+                                },
+                                {
+                                    data: [-413, -10, -99, -39, -236, 449],
+                                    label: "Summary",
+                                    color: "blue",
+                                },
+                            ]}
+                            width={600}
+                            height={300}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item md={6} sm={12}>
+                    <BarChart
+                        xAxis={[{ scaleType: "band", data: ["group A", "group B", "group C"] }]}
+                        series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
+                        width={600}
+                        height={300}
+                    />
+                </Grid>
+            </Grid>
             {/*<Box style={{ display: "flex", alignItems: "center" }}>*/}
             {/*    <BarChart*/}
             {/*        xAxis={[{ scaleType: "band", data: ["Summary per day"] }]}*/}
@@ -263,7 +264,6 @@ export default function Statistics() {
             {/*        height={300}*/}
             {/*    />*/}
             {/*</Box>*/}
-
             {/*<Box>*/}
             {/*    <Box mt={5} textAlign="right">*/}
             {/*        <Button variant="contained" startIcon={<AddIcon />}>*/}
