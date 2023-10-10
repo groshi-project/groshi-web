@@ -10,6 +10,7 @@ import GroshiAPIClient from "../groshi";
 import GuestTopBar from "../components/GuestTopBar";
 
 import * as routes from "../routes";
+import { TOKEN } from "../localStorageKeys";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Login() {
 
     // redirect user to the dashboard if token is already stored:
     useEffect(() => {
-        if (localStorage.getItem("token")) {
+        if (localStorage.getItem(TOKEN)) {
             navigate(routes.STATISTICS_ROUTE);
         }
     }, []);
@@ -37,7 +38,7 @@ export default function Login() {
         groshi
             .authLogin(username, password)
             .then((response) => {
-                localStorage.setItem("token", response.token);
+                localStorage.setItem(TOKEN, response.token);
                 navigate(routes.STATISTICS_ROUTE);
             })
             .catch((e) => {

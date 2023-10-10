@@ -24,6 +24,7 @@ import Transactions from "../views/Transactions";
 import * as routes from "../routes";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import { TOKEN } from "../localStorageKeys";
 
 const drawerWidth = 220;
 
@@ -96,12 +97,13 @@ export default function Sidebar(props) {
                 break;
         }
     }, []);
+
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
     const handleLogOut = () => {
-        localStorage.removeItem("token");
+        localStorage.removeItem(TOKEN);
         navigate(routes.LOGIN_ROUTE);
     };
 

@@ -20,8 +20,9 @@ import ErrorSnackbar from "../components/ErrorSnackbar";
 import {
     SETTINGS_PRIMARY_CURRENCY_CODE,
     SETTINGS_PRIMARY_CURRENCY_SYMBOL,
+    SETTINGS_WEEK_FIRST_DAY,
     TOKEN,
-} from "../localstorageKeys";
+} from "../localStorageKeys";
 import * as dateutil from "../utils/dateutils";
 
 // function getWindowDimensions() {
@@ -62,70 +63,94 @@ function SummariesRow(props) {
     const [monthSummary, setMonthSummary] = useState(emptySummary);
     const [yearSummary, setYearSummary] = useState(emptySummary);
 
-    const [periods, setPeriods] = useState({
-        dayStart: null,
-        dayEnd: null,
-        weekStart: null,
-        weekEnd: null,
-        monthStart: null,
-        monthEnd: null,
-        yearStart: null,
-        yearEnd: null,
-    });
-    useEffect(() => {
-        setPeriods({
-            dayStart: dateutil.dayStart(),
-            dayEnd: dateutil.dayEnd(),
+    // const [periods, setPeriods] = useState(null);
+    // periods:
+    const [dayStart, setDayStart] = useState(null);
+    const [dayEnd, setDayEnd] = useState(null);
+    const [weekStart, setWeekStart] = useState(null);
+    const [weekEnd, setWeekEnd] = useState(null);
+    const [monthStart, setMonthStart] = useState(null);
+    const [monthEnd, setMonthEnd] = useState(null);
+    const [yearStart, setYearStart] = useState(null);
+    const [yearEnd, setYearEnd] = useState(null);
 
-            weekStart: dateutil.weekStart(1), //todo
-            weekEnd: dateutil.weekEnd(1), //todo
-
-            monthStart: dateutil.monthStart(),
-            monthEnd: dateutil.monthEnd(),
-
-            yearStart: dateutil.yearStart(),
-            yearEnd: dateutil.yearEnd(),
-        });
-    }, []);
+    const [weekFirstDay, setWeekFirstDay] = useState(null);
 
     const summaries = [
         {
             title: "Today",
-            start: periods.dayStart,
-            end: periods.dayEnd,
+            start: dayStart,
+            end: dayEnd,
 
             summary: daySummary,
             setSummary: setDaySummary,
         },
         {
             title: "This week",
-            start: periods.weekStart,
-            end: periods.weekEnd,
+            start: weekStart,
+            end: weekEnd,
 
             summary: weekSummary,
             setSummary: setWeekSummary,
         },
         {
             title: "This month",
-            start: periods.monthStart,
-            end: periods.monthEnd,
+            start: monthStart,
+            end: monthEnd,
 
             summary: monthSummary,
             setSummary: setMonthSummary,
         },
         {
             title: "This year",
-            start: periods.yearStart,
-            end: periods.yearEnd,
+            start: yearStart,
+            end: yearEnd,
 
             summary: yearSummary,
             setSummary: setYearSummary,
         },
     ];
 
+    useEffect(() => {
+        let storedWeekFirstDay = localStorage.getItem(SETTINGS_WEEK_FIRST_DAY);
+        if (storedWeekFirstDay) {
+            setWeekFirstDay(parseInt(storedWeekFirstDay));
+        } else {
+            setWeekFirstDay(0);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (weekFirstDay === null) {
+            return;
+        }
+        setDayStart(dateutil.dayStart());
+        setDayEnd(dateutil.dayEnd());
+
+        setWeekStart(dateutil.weekStart(weekFirstDay));
+        setWeekEnd(dateutil.weekEnd(weekFirstDay));
+
+        setMonthStart(dateutil.monthStart());
+        setMonthEnd(dateutil.monthEnd());
+
+        setYearStart(dateutil.yearStart());
+        setYearEnd(dateutil.yearEnd());
+    }, [weekFirstDay]);
+
     // fetch summaries for all periods:
     useEffect(() => {
-        if (!groshi || !primaryCurrency) {
+        if (
+            !groshi ||
+            !primaryCurrency ||
+            !dayStart ||
+            !dayEnd ||
+            !weekStart ||
+            !weekEnd ||
+            !monthStart ||
+            !monthEnd ||
+            !yearStart ||
+            !yearEnd
+        ) {
             return;
         }
         for (const summary of summaries) {
@@ -143,7 +168,18 @@ function SummariesRow(props) {
                     console.error("Error while fetching '" + summary.title + "' summary:", e);
                 });
         }
-    }, [groshi, primaryCurrency]);
+    }, [
+        groshi,
+        primaryCurrency,
+        dayStart,
+        dayEnd,
+        weekStart,
+        weekEnd,
+        monthStart,
+        monthEnd,
+        yearStart,
+        yearEnd,
+    ]);
 
     return (
         <Grid container spacing={4}>
@@ -169,7 +205,7 @@ function SummariesRow(props) {
                         </span>
                     </Typography>
                     <Typography variant="subtitle1">
-                        <b>{summary.name}</b>{" "}
+                        <b>{summary.title}</b>{" "}
                         <Tooltip title="Transactions count">
                             <span>({summary.summary.transactions_count})</span>
                         </Tooltip>
@@ -204,8 +240,8 @@ export default function StatisticsView() {
         const code = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_CODE);
         const symbol = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_SYMBOL);
 
-        if (code && symbol) {
-            setPrimaryCurrency({ code: code, symbol: symbol });
+        if (code) {
+            setPrimaryCurrency({ code: code, symbol: symbol ? symbol : "?" });
         } else {
             setPrimaryCurrency({ code: "USD", symbol: "$" });
         }

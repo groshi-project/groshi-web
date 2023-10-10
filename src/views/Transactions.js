@@ -34,6 +34,7 @@ import GroshiAPIClient from "../groshi";
 import * as routes from "../routes";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import * as dateutils from "../utils/dateutils";
+import { SETTINGS_PRIMARY_CURRENCY_CODE, TOKEN } from "../localStorageKeys";
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
@@ -152,7 +153,12 @@ function TransactionsGrid(props) {
                     severity: "success",
                 });
             } catch (e) {
+                setSnackbar({
+                    children: "Could not create a new transaction on the server",
+                    severity: "error",
+                });
                 console.error("Failed to create a new transaction:", e);
+                return;
             }
         } else {
             // if row was edited using EDIT button
@@ -199,12 +205,17 @@ function TransactionsGrid(props) {
                             });
                         })
                         .catch((e) => {
+                            setSnackbar({
+                                children: "Could not update transaction on the server",
+                                severity: "error",
+                            });
                             console.error("Failed to update transaction:", e);
                         });
                     break;
                 }
             }
         }
+
         const updatedRow = { ...newRow, isNew: false };
         setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
         return updatedRow;
@@ -226,10 +237,11 @@ function TransactionsGrid(props) {
         },
         {
             field: "date",
-            type: "dateTime",
+            // type: "dateTime",
+            type: "date",
             headerName: "Date",
             editable: true,
-            width: 175,
+            width: 120,
         },
         {
             field: "amount",
@@ -250,20 +262,6 @@ function TransactionsGrid(props) {
             editable: true,
             width: 500,
         },
-        // {
-        //     // hidden col
-        //     field: "created_at",
-        //     type: "dateTime",
-        //     headerName: "Created at",
-        //     width: 175,
-        // },
-        // {
-        //     // hidden col
-        //     field: "updated_at",
-        //     type: "dateTime",
-        //     headerName: "Updated at",
-        //     width: 175,
-        // },
         {
             field: "actions",
             type: "actions",
@@ -369,6 +367,7 @@ export default function Transactions() {
     // const [errorMessage, setErrorMessage] = useState(null);
 
     const [supportedCurrencyCodes, setSupportedCurrencyCodes] = useState([]);
+    const [primaryCurrencyCode, setPrimaryCurrencyCode] = useState("");
 
     // view settings:
     const [currency, setCurrency] = useState(ORIGINAL_CURRENCY);
@@ -378,17 +377,9 @@ export default function Transactions() {
     // grid props:
     const [rows, setRows] = useState([]);
 
-    // set default startTime and endTime (current month period):
-    useEffect(() => {
-        const monthStart = dateutils.monthStart();
-        const monthEnd = dateutils.monthEnd();
-        setStartTime(monthStart);
-        setEndTime(monthEnd);
-    }, []);
-
     // initialize groshi client:
     useEffect(() => {
-        let token = localStorage.getItem("token");
+        let token = localStorage.getItem(TOKEN);
         if (!token) {
             navigate(routes.LOGIN_ROUTE);
             return;
@@ -396,24 +387,13 @@ export default function Transactions() {
         setGroshi(new GroshiAPIClient(token));
     }, []);
 
-    // fetch supported currencies:
+    // set default startTime and endTime (current month period):
     useEffect(() => {
-        if (!groshi) {
-            return;
-        }
-        groshi
-            .currenciesRead()
-            .then((currencies) => {
-                let currencyCodes = [];
-                for (const item of currencies) {
-                    currencyCodes.push(item.code);
-                }
-                setSupportedCurrencyCodes(currencyCodes);
-            })
-            .catch((e) => {
-                console.error("Error fetching supported currencies:", e);
-            });
-    }, [groshi]);
+        const monthStart = dateutils.monthStart();
+        const monthEnd = dateutils.monthEnd();
+        setStartTime(monthStart);
+        setEndTime(monthEnd);
+    }, []);
 
     // fetch transactions for a given period in a given currency:
     useEffect(() => {
@@ -446,6 +426,38 @@ export default function Transactions() {
             });
     }, [groshi, currency, startTime, endTime]);
 
+    // fetch supported currencies:
+    useEffect(() => {
+        if (!groshi) {
+            return;
+        }
+        groshi
+            .currenciesRead()
+            .then((currencies) => {
+                let currencyCodes = [];
+                for (const item of currencies) {
+                    currencyCodes.push(item.code);
+                }
+                setSupportedCurrencyCodes(currencyCodes);
+            })
+            .catch((e) => {
+                console.error("Error fetching supported currencies:", e);
+            });
+    }, [groshi]);
+
+    // read primary currency code from the local storage:
+    useEffect(() => {
+        if (supportedCurrencyCodes.length === 0) {
+            return;
+        }
+        const storedPrimaryCurrencyCode = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_CODE);
+        if (storedPrimaryCurrencyCode) {
+            setPrimaryCurrencyCode(storedPrimaryCurrencyCode);
+        } else {
+            setPrimaryCurrencyCode("USD");
+        }
+    }, [supportedCurrencyCodes]);
+
     return (
         <Box>
             <Box sx={{ marginBottom: 1 }}>
@@ -461,8 +473,11 @@ export default function Transactions() {
                         }}
                         sx={{ width: 200, marginRight: 1 }}
                     >
-                        <MenuItem divider key={ORIGINAL_CURRENCY} value={ORIGINAL_CURRENCY}>
+                        <MenuItem key={ORIGINAL_CURRENCY} value={ORIGINAL_CURRENCY}>
                             {ORIGINAL_CURRENCY}
+                        </MenuItem>
+                        <MenuItem divider key={primaryCurrencyCode} value={primaryCurrencyCode}>
+                            {primaryCurrencyCode}
                         </MenuItem>
                         {supportedCurrencyCodes.map((code) => (
                             <MenuItem key={code} value={code}>

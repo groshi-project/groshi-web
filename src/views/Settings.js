@@ -20,7 +20,7 @@ import {
     SETTINGS_WEEK_FIRST_DAY,
     SETTINGS_PRIMARY_CURRENCY_CODE,
     SETTINGS_PRIMARY_CURRENCY_SYMBOL,
-} from "../localstorageKeys";
+} from "../localStorageKeys";
 import { useNavigate } from "react-router-dom";
 import GroshiAPIClient from "../groshi";
 import { LoginOutlined } from "@mui/icons-material";

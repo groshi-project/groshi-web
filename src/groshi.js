@@ -1,4 +1,4 @@
-import { GROSHI_SOCKET } from "./config";
+import { GROSHI_SOCKET } from "./env";
 
 export default class GroshiAPIClient {
     BASE_URL = GROSHI_SOCKET.replace(/\/+$/, "");
@@ -41,6 +41,7 @@ export default class GroshiAPIClient {
             });
         });
     }
+
     // methods related to authorization:
     authLogin(username, password) {
         return this.#sendRequest("POST", "/auth/login", {
