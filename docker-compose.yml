@@ -1,0 +1,9 @@
+services:
+  groshi-web:
+    container_name: groshi-web
+    build:
+      context: .
+      args:
+        GROSHI_SOCKET: http://localhost:8080
+    ports:
+      - "80:8080"
