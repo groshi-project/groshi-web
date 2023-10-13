@@ -1,6 +1,6 @@
 {
     "name": "groshi-web",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Web client for groshi",
     "main": "index.js",
     "scripts": {
