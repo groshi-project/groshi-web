@@ -26,7 +26,8 @@ import GroshiAPIClient from "../groshi";
 import { LoginOutlined } from "@mui/icons-material";
 import { LOGIN_ROUTE } from "../routes";
 
-export default function SettingsView() {
+const SettingsView = ({ name }) => {
+    console.log(name);
     const navigate = useNavigate();
 
     const settingsNavLinkStyle = {
@@ -141,6 +142,7 @@ export default function SettingsView() {
 
     const handleThemeSelectChange = (e) => {
         const value = e.target.value;
+        // swapTheme(value);
         setTheme(value);
         localStorage.setItem(SETTINGS_THEME, value);
     };
@@ -237,4 +239,6 @@ export default function SettingsView() {
             </Alert>
         </Box>
     );
-}
+};
+
+export default SettingsView;
