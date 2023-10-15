@@ -24,6 +24,8 @@ import {
     TOKEN,
 } from "../localStorageKeys";
 import * as dateutil from "../utils/dateutils";
+import { setPath } from "../utils/path";
+import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
 
 // function getWindowDimensions() {
 //     const { innerWidth: width, innerHeight: height } = window;
@@ -224,6 +226,11 @@ export default function StatisticsView() {
 
     // currency information:
     const [primaryCurrency, setPrimaryCurrency] = useState({ code: "", symbol: "" });
+
+    // set URL path:
+    useEffect(() => {
+        setPath(STATISTICS_ROUTE);
+    }, []);
 
     // initialize groshi:
     useEffect(() => {

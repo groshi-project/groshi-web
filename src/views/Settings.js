@@ -24,10 +24,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import GroshiAPIClient from "../groshi";
 import { LoginOutlined } from "@mui/icons-material";
-import { LOGIN_ROUTE } from "../routes";
+import { LOGIN_ROUTE, SETTINGS_ROUTE } from "../routes";
+import { setPath } from "../utils/path";
 
 const SettingsView = ({ name }) => {
-    console.log(name);
+    // console.log(name);
     const navigate = useNavigate();
 
     const settingsNavLinkStyle = {
@@ -68,6 +69,11 @@ const SettingsView = ({ name }) => {
     const [theme, setTheme] = useState(DEFAULT_THEME);
     const [weekFirstDay, setWeekFirstDay] = useState(DEFAULT_WEEK_FIRST_DAY);
     const [primaryCurrencyCode, setPrimaryCurrencyCode] = useState("");
+
+    // set URL path
+    useEffect(() => {
+        setPath(SETTINGS_ROUTE);
+    }, []);
 
     // fetch available currencies:
     useEffect(() => {
