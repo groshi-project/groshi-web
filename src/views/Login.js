@@ -12,7 +12,7 @@ import GuestTopBar from "../components/GuestTopBar";
 import * as routes from "../routes";
 import { TOKEN } from "../localStorageKeys";
 
-export default function Login() {
+const LoginView = () => {
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
@@ -110,4 +110,6 @@ export default function Login() {
             </Box>
         </Container>
     );
-}
+};
+
+export default LoginView;

@@ -23,7 +23,7 @@ import {
     SETTINGS_WEEK_FIRST_DAY,
     TOKEN,
 } from "../localStorageKeys";
-import * as dateutil from "../utils/dateutils";
+import * as dateutil from "../utils/period";
 import { setPath } from "../utils/path";
 import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
 
@@ -218,7 +218,7 @@ function SummariesRow(props) {
     );
 }
 
-export default function StatisticsView() {
+const StatisticsView = () => {
     const navigate = useNavigate();
 
     // const { height, width } = useWindowDimensions();
@@ -337,4 +337,6 @@ export default function StatisticsView() {
             {/*</Box>*/}
         </Box>
     );
-}
+};
+
+export default StatisticsView;

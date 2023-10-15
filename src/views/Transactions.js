@@ -33,7 +33,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import GroshiAPIClient from "../groshi";
 import * as routes from "../routes";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import * as dateutils from "../utils/dateutils";
+import * as dateutils from "../utils/period";
 import { SETTINGS_PRIMARY_CURRENCY_CODE, TOKEN } from "../localStorageKeys";
 import { setPath } from "../utils/path";
 import { STATISTICS_ROUTE, TRANSACTIONS_ROUTE } from "../routes";
@@ -361,7 +361,7 @@ function TransactionsGrid(props) {
 
 const ORIGINAL_CURRENCY = "The original currency";
 
-export default function TransactionsView() {
+const TransactionsView = () => {
     const navigate = useNavigate();
 
     const [groshi, setGroshi] = useState(null);
@@ -525,4 +525,6 @@ export default function TransactionsView() {
             />
         </Box>
     );
-}
+};
+
+export default TransactionsView;

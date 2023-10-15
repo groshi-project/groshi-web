@@ -1,5 +1,5 @@
-// authorization:
-export const TOKEN = "token"; // string, JWT
+// JWT:
+export const TOKEN = "token";
 
 // primary currency code and symbol:
 export const SETTINGS_PRIMARY_CURRENCY_CODE = "settings.primaryCurrency.code";

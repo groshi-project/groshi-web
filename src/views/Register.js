@@ -14,7 +14,7 @@ import GuestTopBar from "../components/GuestTopBar";
 
 import * as routes from "../routes";
 
-export default function Register() {
+const RegisterView = () => {
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
@@ -116,4 +116,6 @@ export default function Register() {
             </Box>
         </Container>
     );
-}
+};
+
+export default RegisterView;

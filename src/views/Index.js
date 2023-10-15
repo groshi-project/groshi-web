@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import * as routes from "../routes";
 import { TOKEN } from "../localStorageKeys";
-export default function Index() {
+
+const IndexView = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -13,4 +14,6 @@ export default function Index() {
             navigate(routes.LOGIN_ROUTE);
         }
     }, []);
-}
+};
+
+export default IndexView;
