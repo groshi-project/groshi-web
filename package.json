@@ -1,7 +1,7 @@
 {
-    "name": "groshi-web",
+    "name": "webgroshi",
     "version": "0.1.0",
-    "description": "Web client for groshi",
+    "description": "web client for groshi",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",

@@ -1,6 +1,6 @@
 services:
-  groshi-web:
-    container_name: groshi-web
+  webgroshi:
+    container_name: webgroshi
     build:
       context: .
       args:
