@@ -79,21 +79,19 @@ export function pastNMonths(n) {
     let months = [];
 
     for (let shift = -n; shift <= -1; shift++) {
-        let year = now.getFullYear()
+        let year = now.getFullYear();
         let monthIndex = now.getMonth() + shift;
 
         if (monthIndex < 0) {
             monthIndex = 12 + monthIndex;
             year--;
         }
-        const date = new Date(year, monthIndex)
-        months.push(
-            {
-                name: date.toLocaleDateString("default", {month: "short"}),
-                start: monthStart(date),
-                end: monthEnd(date),
-            }
-        )
+        const date = new Date(year, monthIndex);
+        months.push({
+            name: date.toLocaleDateString("default", { month: "short" }),
+            start: monthStart(date),
+            end: monthEnd(date),
+        });
     }
     return months;
 }

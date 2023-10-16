@@ -18,9 +18,7 @@ import {
     GridRowEditStopReasons,
 } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import {
-    randomId,
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";

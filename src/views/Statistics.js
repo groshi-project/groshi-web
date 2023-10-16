@@ -26,7 +26,7 @@ import {
 import * as dateutil from "../utils/period";
 import { setPath } from "../utils/history";
 import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
-import {pastNMonths} from "../utils/period";
+import { pastNMonths } from "../utils/period";
 
 // function getWindowDimensions() {
 //     const { innerWidth: width, innerHeight: height } = window;
@@ -51,7 +51,7 @@ import {pastNMonths} from "../utils/period";
 //     return windowDimensions;
 // }
 
-const SummariesRow = ({groshi, primaryCurrency}) => {
+const SummariesRow = ({ groshi, primaryCurrency }) => {
     const emptySummary = {
         income: 0,
         outcome: 0,
@@ -215,13 +215,10 @@ const SummariesRow = ({groshi, primaryCurrency}) => {
             ))}
         </Grid>
     );
-}
+};
 
-const PastSixMonthBarChart = ({groshi, primaryCurrency}) => {
-
-
+const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
     const [months, setMonths] = useState(["", "", "", "", "", ""]);
-
 
     const [chartIncomes, setChartIncomes] = useState([0, 0, 0, 0, 0, 0]);
     const [chartOutcomes, setChartOutcomes] = useState([0, 0, 0, 0, 0, 0]);
@@ -229,61 +226,62 @@ const PastSixMonthBarChart = ({groshi, primaryCurrency}) => {
 
     // calculate past 6 months:
     useEffect(() => {
-        setMonths(pastNMonths(6))
+        setMonths(pastNMonths(6));
     }, []);
 
     // fetch summaries for months:
     useEffect(() => {
         if (!groshi || !primaryCurrency.isSet || months.length === 0) {
-            return
+            return;
         }
 
         for (const month of months) {
-            groshi.transactionsSummary(
-                primaryCurrency.code, month.start, month.end
-            ).then((summary) => {
-                setChartIncomes((chartIncomes) => [...chartIncomes, summary.income]);
-                setChartOutcomes((chartOutcomes) => [...chartOutcomes, summary.outcome]);
-                console.log(chartIncomes)
-                console.log(chartOutcomes)
-
-            }).catch((e) => {
-                console.error("Failed to fetch summary for", month + ":", e)
-            });
+            groshi
+                .transactionsSummary(primaryCurrency.code, month.start, month.end)
+                .then((summary) => {
+                    setChartIncomes((chartIncomes) => [...chartIncomes, summary.income]);
+                    setChartOutcomes((chartOutcomes) => [...chartOutcomes, summary.outcome]);
+                    console.log(chartIncomes);
+                    console.log(chartOutcomes);
+                })
+                .catch((e) => {
+                    console.error("Failed to fetch summary for", month + ":", e);
+                });
         }
-
     }, [groshi, primaryCurrency, months]);
 
-    return <Box>
-        <BarChart
-            xAxis={[
-                {
-                    scaleType: "band",
-                    data: months.map(month => month.name),
-                },
-            ]}
-            series={[
-                {
-                    data: [1, 2, 3, 4, 5, 6],
-                    label: "Income",
-                    color: "green",
-                },
-                {
-                    data: [1, 2, 3, 4, 5, 6],
-                    label: "Outcome",
-                    color: "red",
-                },
-                // {
-                //     data: [-413, -10, -99, -39, -236, 449],
-                //     label: "Summary",
-                //     color: "blue",
-                // },
-            ]}
-            width={600}
-            height={300}
-        />
-    </Box>
-}
+    return (
+        <Box>
+            <BarChart
+                xAxis={[
+                    {
+                        scaleType: "band",
+                        data: months.map((month) => month.name),
+                    },
+                ]}
+                series={[
+                    {
+                        data: [1, 2, 3, 4, 5, 6],
+                        label: "Income",
+                        color: "green",
+                    },
+                    {
+                        data: [1, 2, 3, 4, 5, 6],
+                        label: "Outcome",
+                        color: "red",
+                    },
+                    // {
+                    //     data: [-413, -10, -99, -39, -236, 449],
+                    //     label: "Summary",
+                    //     color: "blue",
+                    // },
+                ]}
+                width={600}
+                height={300}
+            />
+        </Box>
+    );
+};
 
 const StatisticsView = () => {
     const navigate = useNavigate();
