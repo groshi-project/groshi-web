@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import GroshiAPIClient from "../groshi";
 import { LoginOutlined } from "@mui/icons-material";
 import { LOGIN_ROUTE, SETTINGS_ROUTE } from "../routes";
-import { setPath } from "../utils/path";
+import { setPath } from "../utils/history";
 
 const SettingsView = ({ name }) => {
     // console.log(name);

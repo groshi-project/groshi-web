@@ -24,7 +24,7 @@ import {
     TOKEN,
 } from "../localStorageKeys";
 import * as dateutil from "../utils/period";
-import { setPath } from "../utils/path";
+import { setPath } from "../utils/history";
 import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
 import {pastNMonths} from "../utils/period";
 

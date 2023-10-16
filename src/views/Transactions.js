@@ -30,7 +30,7 @@ import * as routes from "../routes";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import * as dateutils from "../utils/period";
 import { SETTINGS_PRIMARY_CURRENCY_CODE, TOKEN } from "../localStorageKeys";
-import { setPath } from "../utils/path";
+import { setPath } from "../utils/history";
 import { STATISTICS_ROUTE, TRANSACTIONS_ROUTE } from "../routes";
 
 function EditToolbar(props) {
