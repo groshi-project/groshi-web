@@ -26,6 +26,7 @@ import {
 import * as dateutil from "../utils/period";
 import { setPath } from "../utils/path";
 import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
+import {pastNMonths} from "../utils/period";
 
 // function getWindowDimensions() {
 //     const { innerWidth: width, innerHeight: height } = window;
@@ -50,9 +51,7 @@ import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
 //     return windowDimensions;
 // }
 
-function SummariesRow(props) {
-    const { groshi, primaryCurrency } = props;
-
+const SummariesRow = ({groshi, primaryCurrency}) => {
     const emptySummary = {
         income: 0,
         outcome: 0,
@@ -129,8 +128,8 @@ function SummariesRow(props) {
         setDayStart(dateutil.dayStart());
         setDayEnd(dateutil.dayEnd());
 
-        setWeekStart(dateutil.weekStart(weekFirstDay));
-        setWeekEnd(dateutil.weekEnd(weekFirstDay));
+        setWeekStart(dateutil.weekStart(undefined, weekFirstDay));
+        setWeekEnd(dateutil.weekEnd(undefined, weekFirstDay));
 
         setMonthStart(dateutil.monthStart());
         setMonthEnd(dateutil.monthEnd());
@@ -218,6 +217,74 @@ function SummariesRow(props) {
     );
 }
 
+const PastSixMonthBarChart = ({groshi, primaryCurrency}) => {
+
+
+    const [months, setMonths] = useState(["", "", "", "", "", ""]);
+
+
+    const [chartIncomes, setChartIncomes] = useState([0, 0, 0, 0, 0, 0]);
+    const [chartOutcomes, setChartOutcomes] = useState([0, 0, 0, 0, 0, 0]);
+    // const [chartTotals, setChartTotals] = useState([]);
+
+    // calculate past 6 months:
+    useEffect(() => {
+        setMonths(pastNMonths(6))
+    }, []);
+
+    // fetch summaries for months:
+    useEffect(() => {
+        if (!groshi || !primaryCurrency.isSet || months.length === 0) {
+            return
+        }
+
+        for (const month of months) {
+            groshi.transactionsSummary(
+                primaryCurrency.code, month.start, month.end
+            ).then((summary) => {
+                setChartIncomes((chartIncomes) => [...chartIncomes, summary.income]);
+                setChartOutcomes((chartOutcomes) => [...chartOutcomes, summary.outcome]);
+                console.log(chartIncomes)
+                console.log(chartOutcomes)
+
+            }).catch((e) => {
+                console.error("Failed to fetch summary for", month + ":", e)
+            });
+        }
+
+    }, [groshi, primaryCurrency, months]);
+
+    return <Box>
+        <BarChart
+            xAxis={[
+                {
+                    scaleType: "band",
+                    data: months.map(month => month.name),
+                },
+            ]}
+            series={[
+                {
+                    data: [1, 2, 3, 4, 5, 6],
+                    label: "Income",
+                    color: "green",
+                },
+                {
+                    data: [1, 2, 3, 4, 5, 6],
+                    label: "Outcome",
+                    color: "red",
+                },
+                // {
+                //     data: [-413, -10, -99, -39, -236, 449],
+                //     label: "Summary",
+                //     color: "blue",
+                // },
+            ]}
+            width={600}
+            height={300}
+        />
+    </Box>
+}
+
 const StatisticsView = () => {
     const navigate = useNavigate();
 
@@ -225,7 +292,7 @@ const StatisticsView = () => {
     const [groshi, setGroshi] = useState(null);
 
     // currency information:
-    const [primaryCurrency, setPrimaryCurrency] = useState({ code: "", symbol: "" });
+    const [primaryCurrency, setPrimaryCurrency] = useState({ code: "", symbol: "", isSet: false });
 
     // set URL path:
     useEffect(() => {
@@ -248,9 +315,9 @@ const StatisticsView = () => {
         const symbol = localStorage.getItem(SETTINGS_PRIMARY_CURRENCY_SYMBOL);
 
         if (code) {
-            setPrimaryCurrency({ code: code, symbol: symbol ? symbol : "?" });
+            setPrimaryCurrency({ code: code, symbol: symbol ? symbol : "?", isSet: true });
         } else {
-            setPrimaryCurrency({ code: "USD", symbol: "$" });
+            setPrimaryCurrency({ code: "USD", symbol: "$", isSet: true });
         }
     }, []);
 
@@ -260,43 +327,16 @@ const StatisticsView = () => {
 
             <Grid container spacing={4} mt={3}>
                 <Grid item md={6} sm={12}>
-                    <Box>
-                        <BarChart
-                            xAxis={[
-                                {
-                                    scaleType: "band",
-                                    data: ["January", "February", "March", "April", "May", "June"],
-                                },
-                            ]}
-                            series={[
-                                {
-                                    data: [543, 902, 745, 925, 613, 964],
-                                    label: "Income",
-                                    color: "green",
-                                },
-                                {
-                                    data: [955, 912, 912, 964, 849, 515],
-                                    label: "Outcome",
-                                    color: "red",
-                                },
-                                {
-                                    data: [-413, -10, -99, -39, -236, 449],
-                                    label: "Summary",
-                                    color: "blue",
-                                },
-                            ]}
-                            width={600}
-                            height={300}
-                        />
-                    </Box>
+                    <PastSixMonthBarChart groshi={groshi} primaryCurrency={primaryCurrency} />
                 </Grid>
                 <Grid item md={6} sm={12}>
-                    <BarChart
-                        xAxis={[{ scaleType: "band", data: ["group A", "group B", "group C"] }]}
-                        series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
-                        width={600}
-                        height={300}
-                    />
+                    Second bar chart
+                    {/*<BarChart*/}
+                    {/*    xAxis={[{ scaleType: "band", data: ["group A", "group B", "group C"] }]}*/}
+                    {/*    series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}*/}
+                    {/*    width={600}*/}
+                    {/*    height={300}*/}
+                    {/*/>*/}
                 </Grid>
             </Grid>
             {/*<Box style={{ display: "flex", alignItems: "center" }}>*/}
