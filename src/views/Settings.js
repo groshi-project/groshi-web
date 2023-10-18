@@ -1,29 +1,22 @@
 import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 // import LaunchIcon from "@mui/icons-material/Launch";
-import TextField from "@mui/material/TextField";
-import EditIcon from "@mui/icons-material/Edit";
 import Alert from "@mui/material/Alert";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PasswordIcon from "@mui/icons-material/Password";
 import PersonIcon from "@mui/icons-material/Person";
 import {
-    SETTINGS_THEME,
-    TOKEN,
-    SETTINGS_WEEK_FIRST_DAY,
     SETTINGS_PRIMARY_CURRENCY_CODE,
     SETTINGS_PRIMARY_CURRENCY_SYMBOL,
+    SETTINGS_THEME,
+    SETTINGS_WEEK_FIRST_DAY,
+    TOKEN,
 } from "../localStorageKeys";
 import { useNavigate } from "react-router-dom";
 import GroshiAPIClient from "../groshi";
-import { LoginOutlined } from "@mui/icons-material";
 import { LOGIN_ROUTE, SETTINGS_ROUTE } from "../routes";
 import { setPath } from "../utils/history";
 

@@ -13,7 +13,7 @@ import SettingsView from "./views/Settings";
 import Login from "./views/Login";
 import Statistics from "./views/Statistics";
 import Transactions from "./views/Transactions";
-import { lightTheme, darkTheme } from "./theme";
+import { darkTheme, lightTheme } from "./theme";
 
 import * as routes from "./routes";
 import { ThemeProvider } from "@emotion/react";

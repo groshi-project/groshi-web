@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import Box from "@mui/material/Box";
@@ -11,11 +11,11 @@ import CancelIcon from "@mui/icons-material/Close";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import {
-    GridRowModes,
     DataGrid,
-    GridToolbarContainer,
     GridActionsCellItem,
     GridRowEditStopReasons,
+    GridRowModes,
+    GridToolbarContainer,
 } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { randomId } from "@mui/x-data-grid-generator";
@@ -25,11 +25,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 import GroshiAPIClient from "../groshi";
 import * as routes from "../routes";
+import { TRANSACTIONS_ROUTE } from "../routes";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import * as dateutils from "../utils/period";
 import { SETTINGS_PRIMARY_CURRENCY_CODE, TOKEN } from "../localStorageKeys";
 import { setPath } from "../utils/history";
-import { STATISTICS_ROUTE, TRANSACTIONS_ROUTE } from "../routes";
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;

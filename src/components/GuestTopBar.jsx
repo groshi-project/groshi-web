@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import StorageIcon from "@mui/icons-material/Storage";
 import { useNavigate } from "react-router-dom";
 
 import * as routes from "../routes";

@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
 import Typography from "@mui/material/Typography";
-import { Alert, Box, Checkbox, Container, FormControlLabel, Grid, Link } from "@mui/material";
+import { Alert, Box, Container, Grid, Link } from "@mui/material";
 import GroshiAPIClient from "../groshi";
 import GuestTopBar from "../components/GuestTopBar";
 

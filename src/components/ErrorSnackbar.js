@@ -1,11 +1,9 @@
-import { Fragment, useEffect, useState } from "react";
-import IconButton from "@mui/material/IconButton";
-import Button from "@mui/material/Button";
+import { useEffect, useState } from "react";
 import { Snackbar } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import Alert from "@mui/material/Alert";
 
 const DURATION = 4000;
+
 export default function ErrorSnackbar(props) {
     const { errorMessage, setErrorMessage } = props;
 

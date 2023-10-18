@@ -131,7 +131,7 @@ export default function Sidebar(props) {
             <Divider />
             <List>
                 <ListItem key={"Log out"} disablePadding>
-                    <ListItemButton onClick={() => handleLogOut()}>
+                    <ListItemButton onClick={(_) => handleLogOut()}>
                         <ListItemIcon>
                             <LogoutIcon />
                         </ListItemIcon>
