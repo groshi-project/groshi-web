@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import { Card, Grid, Tooltip, Button, Alert } from "@mui/material";
+import { Grid, Tooltip } from "@mui/material";
 import GroshiAPIClient from "../groshi";
-import { DataGrid } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts";
 
 import * as routes from "../routes";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import AddIcon from "@mui/icons-material/Add";
-import { randomNumberBetween } from "@mui/x-data-grid/utils/utils";
-import ErrorSnackbar from "../components/ErrorSnackbar";
+import { STATISTICS_ROUTE } from "../routes";
 import {
     SETTINGS_PRIMARY_CURRENCY_CODE,
     SETTINGS_PRIMARY_CURRENCY_SYMBOL,
@@ -24,9 +16,8 @@ import {
     TOKEN,
 } from "../localStorageKeys";
 import * as dateutil from "../utils/period";
-import { setPath } from "../utils/history";
-import { SETTINGS_ROUTE, STATISTICS_ROUTE } from "../routes";
 import { pastNMonths } from "../utils/period";
+import { setPath } from "../utils/history";
 
 // function getWindowDimensions() {
 //     const { innerWidth: width, innerHeight: height } = window;
@@ -222,6 +213,7 @@ const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
 
     const [chartIncomes, setChartIncomes] = useState([0, 0, 0, 0, 0, 0]);
     const [chartOutcomes, setChartOutcomes] = useState([0, 0, 0, 0, 0, 0]);
+
     // const [chartTotals, setChartTotals] = useState([]);
 
     // calculate past 6 months:
@@ -235,14 +227,19 @@ const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
             return;
         }
 
-        for (const month of months) {
+        for (let i = 0; i < months.length; i++) {
+            const month = months[i];
             groshi
                 .transactionsSummary(primaryCurrency.code, month.start, month.end)
                 .then((summary) => {
-                    setChartIncomes((chartIncomes) => [...chartIncomes, summary.income]);
-                    setChartOutcomes((chartOutcomes) => [...chartOutcomes, summary.outcome]);
-                    console.log(chartIncomes);
-                    console.log(chartOutcomes);
+                    setChartIncomes((prevState) => {
+                        prevState[i] = summary.income;
+                        return prevState;
+                    });
+                    setChartOutcomes((prevState) => {
+                        prevState[i] = summary.outcome;
+                        return prevState;
+                    });
                 })
                 .catch((e) => {
                     console.error("Failed to fetch summary for", month + ":", e);
@@ -261,12 +258,12 @@ const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
                 ]}
                 series={[
                     {
-                        data: [1, 2, 3, 4, 5, 6],
+                        data: chartIncomes,
                         label: "Income",
                         color: "green",
                     },
                     {
-                        data: [1, 2, 3, 4, 5, 6],
+                        data: chartOutcomes,
                         label: "Outcome",
                         color: "red",
                     },
