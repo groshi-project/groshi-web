@@ -115,7 +115,7 @@ function TransactionsGrid(props) {
 
     const processRowUpdate = async (newRow) => {
         // ensure that all necessary fields are set and set correctly:
-        if (!newRow.date || newRow.amount === 0 || !newRow.currency) {
+        if (!newRow.timestamp || newRow.amount === 0 || !newRow.currency) {
             setSnackbar({
                 children: "Some fields are missing or filled incorrectly",
                 severity: "error",
@@ -231,10 +231,9 @@ function TransactionsGrid(props) {
             headerName: "UUID",
         },
         {
-            field: "date",
-            // type: "dateTime",
-            type: "date",
+            field: "timestamp",
             headerName: "Date",
+            type: "date",
             editable: true,
             width: 120,
         },
@@ -413,7 +412,7 @@ const TransactionsView = () => {
                         id: randomId(),
 
                         uuid: transaction.uuid,
-                        date: new Date(transaction.timestamp),
+                        timestamp: new Date(transaction.timestamp),
                         amount: transaction.amount / 100,
                         description: transaction.description,
                         currency: transaction.currency,

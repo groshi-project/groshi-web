@@ -16,7 +16,6 @@ import {
     TOKEN,
 } from "../localStorageKeys";
 import * as dateutil from "../utils/period";
-import { pastNMonths } from "../utils/period";
 import { setPath } from "../utils/history";
 
 // function getWindowDimensions() {
@@ -59,10 +58,13 @@ const SummariesRow = ({ groshi, primaryCurrency }) => {
     // periods:
     const [dayStart, setDayStart] = useState(null);
     const [dayEnd, setDayEnd] = useState(null);
+
     const [weekStart, setWeekStart] = useState(null);
     const [weekEnd, setWeekEnd] = useState(null);
+
     const [monthStart, setMonthStart] = useState(null);
     const [monthEnd, setMonthEnd] = useState(null);
+
     const [yearStart, setYearStart] = useState(null);
     const [yearEnd, setYearEnd] = useState(null);
 
@@ -211,19 +213,42 @@ const SummariesRow = ({ groshi, primaryCurrency }) => {
 const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
     const [months, setMonths] = useState(["", "", "", "", "", ""]);
 
-    const [chartIncomes, setChartIncomes] = useState([0, 0, 0, 0, 0, 0]);
-    const [chartOutcomes, setChartOutcomes] = useState([0, 0, 0, 0, 0, 0]);
+    // const [chartIncomes, setChartIncomes] = useState([0, 0, 0, 0, 0, 0]);
+    // const [chartOutcomes, setChartOutcomes] = useState([0, 0, 0, 0, 0, 0]);
 
-    // const [chartTotals, setChartTotals] = useState([]);
+    // const [chartXAxis, setChartXAxis] = useState()
+    const [chartSeries, setChartSeries] = useState([
+        {
+            data: [0, 0, 0, 0, 0, 0],
+            label: "Income",
+            color: "green",
+        },
+        {
+            data: [0, 0, 0, 0, 0, 0],
+            label: "Outcome",
+            color: "red",
+        },
+    ]);
 
     // calculate past 6 months:
-    useEffect(() => {
-        setMonths(pastNMonths(6));
-    }, []);
+    // useEffect(() => {
+    //     setMonths(pastNMonths(6));
+    // }, []);
+
+    // useEffect(() => {
+    //     setChartSeries((prevState) => {
+    //         prevState[0].data[1] = 1;
+    //         return prevState;
+    //     });
+    // }, []);
 
     // fetch summaries for months:
     useEffect(() => {
-        if (!groshi || !primaryCurrency.isSet || months.length === 0) {
+        // setChartSeries((prevState) => {
+        //     prevState[0].data[1] = 1;
+        //     return prevState;
+        // });
+        if (groshi === null) {
             return;
         }
 
@@ -232,20 +257,18 @@ const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
             groshi
                 .transactionsSummary(primaryCurrency.code, month.start, month.end)
                 .then((summary) => {
-                    setChartIncomes((prevState) => {
-                        prevState[i] = summary.income;
+                    setChartSeries((prevState) => {
+                        prevState[0].data[i] = 8;
+                        prevState[1].data[i] = summary.outcome;
                         return prevState;
                     });
-                    setChartOutcomes((prevState) => {
-                        prevState[i] = summary.outcome;
-                        return prevState;
-                    });
+                    console.log(chartSeries);
                 })
                 .catch((e) => {
                     console.error("Failed to fetch summary for", month + ":", e);
                 });
         }
-    }, [groshi, primaryCurrency, months]);
+    }, [groshi, primaryCurrency]);
 
     return (
         <Box>
@@ -256,23 +279,7 @@ const PastSixMonthBarChart = ({ groshi, primaryCurrency }) => {
                         data: months.map((month) => month.name),
                     },
                 ]}
-                series={[
-                    {
-                        data: chartIncomes,
-                        label: "Income",
-                        color: "green",
-                    },
-                    {
-                        data: chartOutcomes,
-                        label: "Outcome",
-                        color: "red",
-                    },
-                    // {
-                    //     data: [-413, -10, -99, -39, -236, 449],
-                    //     label: "Summary",
-                    //     color: "blue",
-                    // },
-                ]}
+                series={chartSeries}
                 width={600}
                 height={300}
             />
@@ -322,7 +329,8 @@ const StatisticsView = () => {
 
             <Grid container spacing={4} mt={3}>
                 <Grid item md={6} sm={12}>
-                    <PastSixMonthBarChart groshi={groshi} primaryCurrency={primaryCurrency} />
+                    First bar chart
+                    {/*<PastSixMonthBarChart groshi={groshi} primaryCurrency={primaryCurrency} />*/}
                 </Grid>
                 <Grid item md={6} sm={12}>
                     Second bar chart

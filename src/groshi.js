@@ -57,6 +57,7 @@ export default class GroshiAPIClient {
 
     // methods related to transactions:
     transactionsCreate(amount, currency, description, timestamp = new Date()) {
+        console.log("transactionsCreate", timestamp);
         return this.#sendRequest(
             "POST",
             "/transactions",
